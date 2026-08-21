@@ -42,9 +42,9 @@ Other scripts:
 The builder is not behind a link — it is the home page.
 
 ```
-  /          1. the opening film — a video hero, then the basket bursting
-                open as you scroll
-             2. קצת השראה — six real photographs, no prices, no buttons
+  /          1. the opening film — one video hero, 1920x1080, looping on
+                itself so it never cuts
+             2. קצת השראה — six real photographs, a swipe rail on phones
              3. the first real question, right there:
 
                 למי המתנה?  →  מה האירוע?  →  מה התקציב?  →  איזה סגנון?
@@ -58,6 +58,10 @@ The builder is not behind a link — it is the home page.
                 greeting → delivery → who's ordering → summary
                           ↓
                 שלחו את ההזמנה לאיריס  → WhatsApp, message pre-filled
+
+             …and below the builder, for anyone who wants to know the shop
+             before they commit: אודותינו, the three service promises, and
+             where to find it.
 
   /build     the same flow, standalone. For direct links from a message or
              a post, where landing on question one without scrolling past a
