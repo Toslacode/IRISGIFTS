@@ -211,7 +211,7 @@ export function buildWhatsAppMessage(
     lines.push('ברכה:', state.greeting.trim(), '');
   }
 
-  lines.push('— נשלח מהאתר של IRISGIFTS');
+  lines.push('— נשלח מהאתר של איריס מתנות');
 
   return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
 }
