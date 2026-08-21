@@ -20,11 +20,12 @@ export const metadata: Metadata = {
     'מארז בהתאמה אישית',
   ],
   openGraph: {
-    title: 'IRISGIFTS — המתנה המושלמת מתחילה כאן',
+    title: 'איריס מתנות — המתנה המושלמת מתחילה כאן',
     description:
       'מארזי מתנה בהתאמה אישית לפי האדם, האירוע והתקציב שלכם.',
     locale: 'he_IL',
     type: 'website',
+    siteName: 'איריס מתנות',
   },
   robots: { index: true, follow: true },
 };

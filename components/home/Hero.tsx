@@ -8,70 +8,84 @@ import { Icon } from '@/components/ui/Icon';
 /* ==========================================================================
    The opening screen.
 
-   A full-bleed ambient loop behind the headline. WebM first — some browsers
-   ship no H.264 and would render nothing from the mp4 alone. `muted` and
-   `playsinline` are both required for autoplay to be allowed.
+   Behind the headline: the studio clip's calm head, slowed and mirrored so it
+   loops without a cut — the basket sitting packed, breathing. It bursts open
+   in the section below, which gives the page its narrative: closed, then
+   scrolled open.
 
-   Until the footage exists, `hasVideo` stays false and the section falls back
-   to a lit champagne ground that carries the same palette. Drop the files in
-   at /public/video and the video takes over with no code change.
+   The footage is a near-white studio set, so the treatment is a light wash
+   with ink text rather than the usual dark scrim with white text. A dark
+   scrim over this clip would leave a muddy grey band where the mask should
+   dissolve into the cream.
+
+   WebM first: some browsers ship no H.264 and would render nothing from the
+   mp4 alone. `muted` and `playsinline` are both required for autoplay.
    ========================================================================== */
 
 export function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [hasVideo, setHasVideo] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    /* networkState 3 = NETWORK_NO_SOURCE: nothing playable was found, which
-       looks identical to a CSS bug unless we check for it explicitly. */
-    const check = () => {
-      setHasVideo(video.networkState !== video.NETWORK_NO_SOURCE);
+    const show = () => setReady(true);
+    const hide = () => setReady(false);
+
+    /* Already buffered by the time this runs — a cached reload never fires
+       `loadeddata`, so the page would sit on the fallback forever. */
+    if (video.readyState >= 2) show();
+
+    video.addEventListener('loadeddata', show);
+    video.addEventListener('error', hide);
+
+    return () => {
+      video.removeEventListener('loadeddata', show);
+      video.removeEventListener('error', hide);
     };
-
-    video.addEventListener('loadeddata', () => setHasVideo(true));
-    video.addEventListener('error', () => setHasVideo(false));
-    const timer = window.setTimeout(check, 900);
-
-    return () => window.clearTimeout(timer);
   }, []);
 
   return (
     <section className="relative isolate overflow-hidden">
       <div className="absolute inset-0 -z-10 bg-canvas-deep" aria-hidden="true">
+        {/* The designed ground. Stays behind the video so a slow connection
+            or a failed source still looks intentional rather than empty. */}
+        <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_15%,#fdf8f0_0%,#f6ead6_38%,#eddcc2_66%,#e2cdb0_100%)]" />
+
         <video
           ref={videoRef}
-          className="size-full object-cover media-tone"
+          /* Absolute, like the layers around it: a statically positioned
+             video paints *below* its absolutely positioned siblings, so the
+             fallback ground would cover the footage entirely. */
+          className={`absolute inset-0 size-full object-cover object-center transition-opacity duration-1000 ease-out-soft ${
+            ready ? 'opacity-100' : 'opacity-0'
+          }`}
           autoPlay
           muted
           loop
           playsInline
-          preload="metadata"
+          preload="auto"
           poster="/video/hero-poster.jpg"
         >
           <source src="/video/hero.webm" type="video/webm" />
           <source src="/video/hero.mp4" type="video/mp4" />
         </video>
 
-        {/* The designed fallback: warm light rising through champagne, so an
-            absent clip still looks intentional rather than broken. */}
-        {!hasVideo && (
-          <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_15%,#fdf8f0_0%,#f6ead6_38%,#eddcc2_66%,#e2cdb0_100%)]">
-            <div className="absolute inset-0 bg-[conic-gradient(from_210deg_at_50%_45%,transparent_0deg,rgba(255,255,255,0.5)_60deg,transparent_130deg,rgba(200,168,107,0.16)_240deg,transparent_320deg)]" />
-          </div>
-        )}
+        {/* Two layers instead of one heavy wash. A flat scrim strong enough
+            to carry ink text would erase the basket entirely, so the frame
+            stays mostly clear and only the area behind the copy is lifted. */}
 
-        {/* Legibility scrim plus a fade into the page ground at the bottom.
-            Lighter over the fallback, which is already pale. */}
-        <div
-          className={
-            hasVideo
-              ? 'absolute inset-0 bg-[linear-gradient(to_bottom,rgba(22,25,42,0.34)_0%,rgba(22,25,42,0.18)_42%,var(--color-canvas)_100%)]'
-              : 'absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,253,250,0.34)_0%,rgba(255,253,250,0.12)_45%,var(--color-canvas)_100%)]'
-          }
-        />
+        {/* 1. Edge treatment: a light touch at the top, dissolving into the
+               page ground at the bottom so the section has no seam. */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(250,246,240,0.46)_0%,rgba(250,246,240,0.10)_26%,transparent_46%,rgba(250,246,240,0.55)_82%,var(--color-canvas)_100%)]" />
+
+        {/* 2. A soft bloom directly behind the headline block. Feathered wide
+               so it reads as light falling on the set, not as a panel. */}
+        <div className="absolute inset-0 bg-[radial-gradient(62%_46%_at_50%_50%,rgba(250,246,240,0.90)_0%,rgba(250,246,240,0.72)_38%,rgba(250,246,240,0.30)_66%,transparent_100%)]" />
+
+        {/* A breath of champagne at the corners keeps it off flat grey */}
+        <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_40%,transparent_52%,rgba(200,168,107,0.13)_100%)]" />
       </div>
 
       <div className="shell flex min-h-[calc(100dvh-var(--nav-h))] flex-col items-center justify-center gap-8 py-24 text-center">
@@ -83,18 +97,14 @@ export function Hero() {
         </span>
 
         <h1
-          className={`anim-rise text-display max-w-4xl ${
-            hasVideo ? 'text-media-text' : 'text-ink'
-          }`}
+          className="anim-rise text-display max-w-4xl text-ink"
           style={{ '--d': 1 } as React.CSSProperties}
         >
           המתנה המושלמת מתחילה כאן
         </h1>
 
         <p
-          className={`anim-rise max-w-xl text-lg leading-relaxed sm:text-xl ${
-            hasVideo ? 'text-media-muted' : 'text-ink-soft'
-          }`}
+          className="anim-rise max-w-xl text-lg leading-relaxed text-ink-soft sm:text-xl"
           style={{ '--d': 2 } as React.CSSProperties}
         >
           אנחנו נעזור לכם להרכיב מארז שמתאים בדיוק לאדם, לאירוע ולתקציב שלכם
@@ -119,7 +129,7 @@ export function Hero() {
         aria-hidden="true"
         className="pointer-events-none absolute bottom-7 left-1/2 -translate-x-1/2 motion-safe:animate-[iris-float_2.6s_ease-in-out_infinite]"
       >
-        <span className="flex h-11 w-7 items-start justify-center rounded-pill border border-gold/50 pt-2">
+        <span className="flex h-11 w-7 items-start justify-center rounded-pill border border-gold/50 bg-canvas/40 pt-2 backdrop-blur-[2px]">
           <span className="block size-1.5 rounded-full bg-gold-deep/70" />
         </span>
       </div>

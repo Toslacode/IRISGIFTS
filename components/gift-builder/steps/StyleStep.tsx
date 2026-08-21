@@ -12,12 +12,12 @@ import type { CategoryId, StyleId } from '@/types';
    a label and an icon. Each maps to a category whose placeholder wash reads
    closest to the mood. */
 const STYLE_IMAGE: Record<StyleId, { src: string; category: CategoryId }> = {
-  luxury: { src: '/images/style-luxury.jpg', category: 'judaica' },
-  clean: { src: '/images/style-clean.jpg', category: 'towels' },
-  romantic: { src: '/images/style-romantic.jpg', category: 'robe' },
-  pampering: { src: '/images/style-pampering.jpg', category: 'skincare' },
-  traditional: { src: '/images/style-traditional.jpg', category: 'homeware' },
-  colorful: { src: '/images/style-colorful.jpg', category: 'sweets' },
+  luxury: { src: '/images/style-luxury.webp', category: 'judaica' },
+  clean: { src: '/images/style-clean.webp', category: 'towels' },
+  romantic: { src: '/images/style-romantic.webp', category: 'robe' },
+  pampering: { src: '/images/style-pampering.webp', category: 'skincare' },
+  traditional: { src: '', category: 'homeware' },
+  colorful: { src: '', category: 'sweets' },
 };
 
 export function StyleStep() {

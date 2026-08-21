@@ -213,15 +213,23 @@ export function BasketUnfold() {
     >
       <div className="sticky top-0 h-dvh overflow-hidden bg-canvas-deep">
         {manifest ? (
-          <canvas ref={canvasRef} className="block size-full media-tone" />
+          <canvas ref={canvasRef} className="block size-full" />
         ) : (
           <UnfoldScene ref={sceneRef} />
         )}
 
-        {/* Fades into the page ground at both edges */}
+        {/* Dissolves into the page ground at both edges. The footage is a
+            near-white studio set, so this is the warm canvas colour rather
+            than a neutral tint, which would leave a grey band. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,var(--color-canvas)_0%,transparent_16%,transparent_84%,var(--color-canvas)_100%)]"
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,var(--color-canvas)_0%,rgba(250,246,240,0.35)_12%,transparent_26%,transparent_74%,rgba(250,246,240,0.35)_88%,var(--color-canvas)_100%)]"
+        />
+
+        {/* A breath of champagne at the edges, matching the hero */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(115%_80%_at_50%_45%,transparent_45%,rgba(200,168,107,0.09)_100%)]"
         />
       </div>
     </section>

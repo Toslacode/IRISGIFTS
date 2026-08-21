@@ -30,7 +30,7 @@ const stories: Story[] = [
   {
     title: 'מתנה לכלה',
     copy: 'חלוק אישי, מגבות רכות וריח שנשאר בזיכרון מבוקר החתונה.',
-    image: '/images/story-bride.jpg',
+    image: '/images/story-bride.webp',
     category: 'robe',
     recipient: 'bride',
     occasion: 'wedding',
@@ -40,7 +40,7 @@ const stories: Story[] = [
   {
     title: 'מתנה לחתן',
     copy: 'יין מיקב בוטיק, סט טיפוח וספר ברכות — מדוד ומכובד.',
-    image: '/images/story-groom.jpg',
+    image: '', // ← drop story-groom.jpg into public/images to use a photo,
     category: 'wine',
     recipient: 'groom',
     occasion: 'wedding',
@@ -50,7 +50,7 @@ const stories: Story[] = [
   {
     title: 'מתנה לזוג',
     copy: 'קרש הגשה, כוסות קריסטל ויין — דברים שנשארים במטבח.',
-    image: '/images/story-couple.jpg',
+    image: '', // ← drop story-couple.jpg into public/images to use a photo,
     category: 'homeware',
     recipient: 'couple',
     occasion: 'engagement',
@@ -60,7 +60,7 @@ const stories: Story[] = [
   {
     title: 'מתנה ליולדת',
     copy: 'רגע של שקט ליולדת עצמה, ושמיכה רכה עם שם התינוק.',
-    image: '/images/story-mother.jpg',
+    image: '', // ← drop story-mother.jpg into public/images to use a photo,
     category: 'skincare',
     recipient: 'new-mother',
     occasion: 'birth',
@@ -70,7 +70,7 @@ const stories: Story[] = [
   {
     title: 'מתנה ליום הולדת',
     copy: 'טיפוח, שוקולד ונר — מארז שמרגיש כמו יום חופש.',
-    image: '/images/story-birthday.jpg',
+    image: '', // ← drop story-birthday.jpg into public/images to use a photo,
     category: 'sweets',
     occasion: 'birthday',
     span: 'md:col-span-4',
@@ -79,7 +79,7 @@ const stories: Story[] = [
   {
     title: 'מתנה לחג',
     copy: 'יין, דבש ונר הבדלה — מארז שמגישים על השולחן.',
-    image: '/images/story-holiday.jpg',
+    image: '', // ← drop story-holiday.jpg into public/images to use a photo,
     category: 'judaica',
     occasion: 'holiday',
     span: 'md:col-span-4',
@@ -88,7 +88,7 @@ const stories: Story[] = [
   {
     title: 'מתנה למשפחה',
     copy: 'מארז שכולם לוקחים ממנו משהו, בלי פריט שמתאים לאחד בלבד.',
-    image: '/images/story-family.jpg',
+    image: '', // ← drop story-family.jpg into public/images to use a photo,
     category: 'homeware',
     recipient: 'family',
     span: 'md:col-span-4',
