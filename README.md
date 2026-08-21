@@ -39,36 +39,37 @@ Other scripts:
 
 ## The customer journey
 
+The builder is not behind a link — it is the home page.
+
 ```
-  /                    cinematic hero → scroll-driven basket opening → gift
-                       stories → how it works → main CTA
-       │
-       └─→ /build      1. למי המתנה?          who it is for
-                       2. מה האירוע?           occasion
-                       3. מה התקציב?           budget band, or an exact figure
-                       4. איזה סגנון?          style (one or two)
-                       5. מה שיהיה במארז?      wanted categories, or "choose for me"
-                       6. מה לא?               exclusions
-                       7. התאמה אישית          personalisation (skippable)
-                          ↓
-                       "אנחנו מרכיבים לכם את המתנה"
-                          ↓
-                       the recommended basket — swap, remove, add,
-                       or ask for a different one entirely
-                          ↓
-                       greeting card → delivery → who's ordering → summary
-                          ↓
-                       שלחו את ההזמנה לאיריס  → WhatsApp, message pre-filled
+  /          1. the opening film — a video hero, then the basket bursting
+                open as you scroll
+             2. קצת השראה — six real photographs, no prices, no buttons
+             3. the first real question, right there:
 
-  /baskets             ready-made baskets, filterable by occasion
-  /baskets/[id]        one basket in full
-  /admin               products, baskets, and store settings
+                למי המתנה?  →  מה האירוע?  →  מה התקציב?  →  איזה סגנון?
+                →  מה שיהיה במארז?  →  מה לא?  →  התאמה אישית
+                          ↓
+                "רגע, אנחנו מרכיבים לכם משהו מיוחד…"
+                          ↓
+                the recommended basket — swap, remove, add, or ask for
+                a different one entirely
+                          ↓
+                greeting → delivery → who's ordering → summary
+                          ↓
+                שלחו את ההזמנה לאיריס  → WhatsApp, message pre-filled
+
+  /build     the same flow, standalone. For direct links from a message or
+             a post, where landing on question one without scrolling past a
+             film first is the point.
+  /baskets   ready-made baskets, filterable by occasion
+  /admin     products, baskets, and store settings
 ```
 
-Answers survive going back, refreshing, and closing the tab. Every answer is
-editable from the final summary in one tap.
-
----
+Each answer transforms the builder area in place — the page does not scroll
+to another section, and the questions are never stacked down the page. Going
+back never clears an answer, and every answer is editable from the final
+summary in one tap.
 
 ## Structure
 
@@ -80,9 +81,10 @@ app/                      routes (App Router)
   admin/                  the owner's dashboard
 
 components/
-  home/                   hero, scroll sequence, stories, CTA
-  gift-builder/           builder shell, progress, and the twelve screens
-    steps/
+  home/                   hero, scroll film, inspiration, embedded builder
+  gift-builder/           the twelve screens, plus the two shells that
+    steps/                wrap them (embedded on the home page, standalone
+                          on /build)
   products/               catalogue cards and basket detail
   checkout/               order summary
   admin/                  product / basket / settings management
