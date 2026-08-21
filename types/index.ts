@@ -177,6 +177,10 @@ export interface StoreSettings {
   whatsappNumber: string;
   storePhone: string;
   storeAddress: string;
+  /** City on its own, for the map link and the location card. */
+  storeCity: string;
+  facebookUrl: string;
+  messengerUrl: string;
   deliveryAreas: string[];
   pickupAvailable: boolean;
   deliveryFee: number;

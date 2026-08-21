@@ -7,10 +7,15 @@ import type { StoreSettings } from '@/types';
    ========================================================================== */
 
 export const defaultSettings: StoreSettings = {
-  /* International format, digits only — this is what wa.me expects. */
-  whatsappNumber: '972500000000',
-  storePhone: '050-000-0000',
-  storeAddress: 'הגפן 12, קריית אתא',
+  /* International format, digits only — this is what wa.me expects.
+     This is the shop's mobile; confirm it is the number that receives
+     WhatsApp before going live. */
+  whatsappNumber: '972506779675',
+  storePhone: '050-6779675',
+  storeAddress: 'העצמאות 27, קריית אתא',
+  storeCity: 'קריית אתא',
+  facebookUrl: 'https://www.facebook.com/irismatanot',
+  messengerUrl: 'https://m.me/irismatanot',
   deliveryAreas: [
     'קריית אתא',
     'קריית ביאליק',

@@ -32,7 +32,7 @@ export function StyleStep() {
         <div
           role="group"
           aria-label="איזה סגנון אתם מחפשים — אפשר לבחור עד שניים"
-          className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3"
+          className="stagger grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3"
         >
           {styles.map((option) => {
             const selected = state.styles.includes(option.id);

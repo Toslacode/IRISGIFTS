@@ -25,7 +25,7 @@ export function BudgetStep() {
         <div
           role="radiogroup"
           aria-label="מה התקציב שלכם"
-          className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+          className="stagger grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
         >
           {budgetBands.map((band) => (
             <ChoiceCard

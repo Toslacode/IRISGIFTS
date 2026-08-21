@@ -16,7 +16,7 @@ export function ExcludeStep() {
         <div
           role="group"
           aria-label="יש משהו שלא תרצו במארז"
-          className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3"
+          className="stagger grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3"
         >
           {exclusions.map((option) => (
             <ChoiceCard

@@ -3,6 +3,7 @@
 import { Icon } from '@/components/ui/Icon';
 import { ProductImage } from '@/components/ui/ProductImage';
 import { formatPrice } from '@/lib/order';
+import { cn } from '@/lib/utils';
 import type { Product } from '@/types';
 
 /* One line inside the recommended basket, with its two edit affordances.
@@ -12,14 +13,23 @@ export function BasketItemRow({
   onSwap,
   onRemove,
   canRemove,
+  leaving = false,
 }: {
   product: Product;
   onSwap: () => void;
   onRemove: () => void;
   canRemove: boolean;
+  /** Collapses the row before the reducer drops it, so the list below
+      settles instead of jumping. */
+  leaving?: boolean;
 }) {
   return (
-    <li className="flex items-center gap-4 border-b border-line py-4 last:border-b-0">
+    <li
+      className={cn(
+        'flex items-center gap-4 border-b border-line py-4 last:border-b-0',
+        leaving && 'row-leaving'
+      )}
+    >
       <div className="size-16 shrink-0 overflow-hidden rounded-card sm:size-20">
         <ProductImage
           src={product.image}

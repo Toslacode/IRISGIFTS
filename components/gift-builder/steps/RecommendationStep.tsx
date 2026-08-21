@@ -38,6 +38,8 @@ export function RecommendationStep() {
   const [picker, setPicker] = useState<PickerMode>({ kind: 'closed' });
   const [variant, setVariant] = useState(0);
   const [reshuffling, setReshuffling] = useState(false);
+  /* The row on its way out. The reducer runs when its collapse finishes. */
+  const [leavingId, setLeavingId] = useState<string | null>(null);
 
   const basket = state.basket;
 
@@ -54,6 +56,26 @@ export function RecommendationStep() {
     if (!basket) return 0;
     return basket.basePrice ?? draftTotal(basket, products);
   }, [basket, products]);
+
+  const removeItem = useCallback(
+    (productId: string) => {
+      const reduce =
+        typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (reduce) {
+        dispatch({ type: 'removeItem', productId });
+        return;
+      }
+
+      setLeavingId(productId);
+      window.setTimeout(() => {
+        dispatch({ type: 'removeItem', productId });
+        setLeavingId(null);
+      }, 260);
+    },
+    [dispatch]
+  );
 
   const suggestAnother = useCallback(() => {
     const nextVariant = variant + 1;
@@ -99,9 +121,12 @@ export function RecommendationStep() {
 
   return (
     <StepShell wide nextLabel="ממשיכים לברכה" onNext={next}>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-start">
+      {/* Phones read straight down — image, name, why, price, items, edit.
+          Desktop keeps the two columns. `order` does the rearranging so the
+          markup stays in one logical sequence. */}
+      <div className="flex flex-col gap-5 lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-start lg:gap-6">
         {/* --- The basket, as a thing you can look at --------------------- */}
-        <div className="overflow-hidden rounded-panel border border-line bg-surface shadow-soft">
+        <div className="order-1 overflow-hidden rounded-panel border border-line bg-surface shadow-soft lg:order-none">
           <div className="relative aspect-16/10 overflow-hidden">
             <ProductImage
               src={basket.image}
@@ -129,16 +154,19 @@ export function RecommendationStep() {
         </div>
 
         {/* --- What's inside, and the live total -------------------------- */}
-        <div className="flex flex-col gap-4">
-          <div className="rounded-panel border border-line bg-surface p-6 shadow-soft">
+        <div className="contents lg:flex lg:flex-col lg:gap-4">
+          <div className="order-3 rounded-panel border border-line bg-surface p-6 shadow-soft lg:order-none">
             <h3 className="text-heading mb-1">מה יש במארז</h3>
             <p className="mb-2 text-[0.875rem] text-ink-muted">
               אפשר להחליף או להסיר כל פריט
             </p>
 
             <ul
+              /* Re-keying on the basket identity replays the stagger whenever a
+                 different basket is proposed. */
+              key={`${basket.name}-${basket.items.length}`}
               className={cn(
-                'transition-opacity duration-300',
+                'stagger transition-opacity duration-300',
                 reshuffling && 'opacity-40'
               )}
             >
@@ -150,9 +178,8 @@ export function RecommendationStep() {
                   onSwap={() =>
                     setPicker({ kind: 'swap', productId: product.id })
                   }
-                  onRemove={() =>
-                    dispatch({ type: 'removeItem', productId: product.id })
-                  }
+                  leaving={leavingId === product.id}
+                  onRemove={() => removeItem(product.id)}
                 />
               ))}
             </ul>
@@ -167,16 +194,20 @@ export function RecommendationStep() {
             </button>
           </div>
 
-          {/* The number that changes as they edit */}
-          <div className="rounded-panel border border-gold-soft bg-gold-wash/60 p-6">
+          {/* The number that changes as they edit. On phones it sits above
+              the item list — "what does this cost" is the question being
+              asked, and it should not need a scroll to answer. */}
+          <div className="order-2 rounded-panel border border-gold-soft bg-gold-wash/60 p-6 lg:order-none">
             <div className="flex items-baseline justify-between gap-4">
               <span className="font-display text-lg font-semibold text-ink">
                 סה"כ
               </span>
               <span
-                /* Announced so the total change is heard, not only seen */
+                /* Announced so the total change is heard, not only seen.
+                   Keying on the value replays the pop on every change. */
+                key={total}
                 aria-live="polite"
-                className="font-display text-3xl font-semibold text-ink tabular-nums"
+                className="anim-pop font-display text-3xl font-semibold text-ink tabular-nums"
               >
                 {formatPrice(total)}
               </span>
@@ -193,7 +224,7 @@ export function RecommendationStep() {
             variant="secondary"
             onClick={suggestAnother}
             disabled={reshuffling}
-            className="w-full"
+            className="order-4 w-full lg:order-none"
           >
             <Icon name="swap" size={18} />
             {reshuffling ? 'מרכיבים מארז אחר…' : 'הציעו לי מארז אחר'}

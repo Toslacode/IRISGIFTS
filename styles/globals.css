@@ -300,6 +300,99 @@
   }
 }
 
+/* Children of a grid arrive one after another rather than as a slab. Driven
+   by nth-child so a grid does not have to hand every card an index. */
+@media (prefers-reduced-motion: no-preference) {
+  .stagger > * {
+    opacity: 0;
+    animation: iris-rise 0.5s var(--ease-out-soft) forwards;
+  }
+
+  .stagger > *:nth-child(1) {
+    animation-delay: 85ms;
+  }
+  .stagger > *:nth-child(2) {
+    animation-delay: 130ms;
+  }
+  .stagger > *:nth-child(3) {
+    animation-delay: 175ms;
+  }
+  .stagger > *:nth-child(4) {
+    animation-delay: 220ms;
+  }
+  .stagger > *:nth-child(5) {
+    animation-delay: 265ms;
+  }
+  .stagger > *:nth-child(6) {
+    animation-delay: 310ms;
+  }
+  .stagger > *:nth-child(7) {
+    animation-delay: 355ms;
+  }
+  .stagger > *:nth-child(8) {
+    animation-delay: 400ms;
+  }
+  .stagger > *:nth-child(9) {
+    animation-delay: 445ms;
+  }
+  .stagger > *:nth-child(10) {
+    animation-delay: 490ms;
+  }
+  .stagger > *:nth-child(11) {
+    animation-delay: 535ms;
+  }
+  .stagger > *:nth-child(12) {
+    animation-delay: 580ms;
+  }
+}
+
+/* The total, when it changes. Short enough to register as feedback rather
+   than as an effect. */
+@media (prefers-reduced-motion: no-preference) {
+  .anim-pop {
+    animation: iris-pop 0.42s var(--ease-out-soft);
+  }
+}
+
+@keyframes iris-pop {
+  0% {
+    transform: scale(0.93);
+    color: var(--color-gold-deep);
+  }
+  100% {
+    transform: scale(1);
+    color: var(--color-ink);
+  }
+}
+
+/* A basket row leaving. The height collapse is what stops the list below
+   from jumping; the reducer runs once the animation has finished. */
+.row-leaving {
+  animation: iris-collapse 0.26s var(--ease-in-out-soft) forwards;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+@keyframes iris-collapse {
+  0% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-14px);
+    max-height: 0;
+    padding-block: 0;
+    border-bottom-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row-leaving {
+    display: none;
+  }
+}
+
 @keyframes step-in-fwd {
   from {
     opacity: 0;

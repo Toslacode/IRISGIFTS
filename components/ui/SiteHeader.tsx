@@ -10,7 +10,8 @@ import { cn } from '@/lib/utils';
 
 const links = [
   { href: '/baskets', label: 'מארזים מוכנים' },
-  { href: '/#inspiration', label: 'השראה' },
+  { href: '/#about', label: 'אודותינו' },
+  { href: '/#visit', label: 'צרו קשר' },
 ];
 
 export function SiteHeader({ transparent = false }: { transparent?: boolean }) {

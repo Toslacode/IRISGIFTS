@@ -76,19 +76,22 @@ export function Hero() {
             to carry ink text would erase the basket entirely, so the frame
             stays mostly clear and only the area behind the copy is lifted. */}
 
-        {/* 1. Edge treatment: a light touch at the top, dissolving into the
+        {/* Two layers, both kept light. The footage is the point, and ink
+            text on a near-white set needs far less scrim than white text on
+            a dark one — an earlier, heavier wash washed the basket out. */}
+
+        {/* 1. Edge treatment only: a touch at the top, dissolving into the
                page ground at the bottom so the section has no seam. */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(250,246,240,0.46)_0%,rgba(250,246,240,0.10)_26%,transparent_46%,rgba(250,246,240,0.55)_82%,var(--color-canvas)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(250,246,240,0.38)_0%,rgba(250,246,240,0.06)_24%,transparent_48%,rgba(250,246,240,0.52)_84%,var(--color-canvas)_100%)]" />
 
-        {/* 2. A soft bloom directly behind the headline block. Feathered wide
-               so it reads as light falling on the set, not as a panel. */}
-        <div className="absolute inset-0 bg-[radial-gradient(62%_46%_at_50%_50%,rgba(250,246,240,0.90)_0%,rgba(250,246,240,0.72)_38%,rgba(250,246,240,0.30)_66%,transparent_100%)]" />
-
-        {/* A breath of champagne at the corners keeps it off flat grey */}
-        <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_40%,transparent_52%,rgba(200,168,107,0.13)_100%)]" />
+        {/* 2. A feathered bloom behind the copy. Enough to hold the type off
+               the lace detail, not enough to flatten the set. */}
+        <div className="absolute inset-0 bg-[radial-gradient(56%_44%_at_50%_52%,rgba(250,246,240,0.74)_0%,rgba(250,246,240,0.52)_44%,rgba(250,246,240,0.18)_74%,transparent_100%)]" />
       </div>
 
-      <div className="shell flex min-h-[calc(100dvh-var(--nav-h))] flex-col items-center justify-center gap-8 py-24 text-center">
+      {/* Short of full height on phones: a hero that fills the screen edge
+          to edge hides the fact that anything follows it. */}
+      <div className="shell flex min-h-[min(86dvh,calc(100dvh-var(--nav-h)))] flex-col items-center justify-center gap-7 py-20 text-center sm:min-h-[calc(100dvh-var(--nav-h))] sm:gap-8 sm:py-24">
         <span
           className="anim-fade eyebrow"
           style={{ '--d': 0 } as React.CSSProperties}
@@ -104,7 +107,7 @@ export function Hero() {
         </h1>
 
         <p
-          className="anim-rise max-w-xl text-lg leading-relaxed text-ink-soft sm:text-xl"
+          className="anim-rise max-w-xl text-lg font-medium leading-relaxed text-ink sm:text-xl"
           style={{ '--d': 2 } as React.CSSProperties}
         >
           בואו נרכיב יחד מארז שמתאים בדיוק למי שאתם רוצים לשמח

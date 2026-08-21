@@ -44,7 +44,9 @@ export type IconName =
   | 'store'
   | 'phone'
   | 'basket'
-  | 'search';
+  | 'search'
+  | 'facebook'
+  | 'messenger';
 
 const paths: Record<IconName, ReactElement> = {
   woman: (
@@ -249,6 +251,18 @@ const paths: Record<IconName, ReactElement> = {
     <>
       <circle cx="10.8" cy="10.8" r="6.4" />
       <path d="m15.6 15.6 4.2 4.2" />
+    </>
+  ),
+  facebook: (
+    <>
+      <rect x="3.6" y="3.6" width="16.8" height="16.8" rx="4" />
+      <path d="M15.4 8.2h-1.6a1.6 1.6 0 0 0-1.6 1.6v2h3.2M10 12.6h4.6M13 20.4v-8.6" />
+    </>
+  ),
+  messenger: (
+    <>
+      <path d="M12 3.6c-4.7 0-8.4 3.5-8.4 8 0 2.6 1.2 4.9 3.1 6.4v3.4l2.9-1.6c.8.2 1.6.3 2.4.3 4.7 0 8.4-3.5 8.4-8s-3.7-8.5-8.4-8.5Z" />
+      <path d="m7.4 14.2 4.2-4.4 2.2 2.2 2.9-2.2-4.2 4.4-2.2-2.2-2.9 2.2Z" />
     </>
   ),
 };

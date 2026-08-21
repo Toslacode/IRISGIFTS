@@ -7,52 +7,47 @@
  * Source: public/video/source/basket-burst.mp4 — a white bridal basket that
  * sits packed, bursts open, and then collapses back together.
  *
- * That shape drives every decision below:
+ * The site has exactly one video moment: the hero. It takes the calm head of
+ * the clip — the basket settled, just beginning to stir — slows it, then
+ * mirrors it so the loop closes on itself instead of cutting behind the
+ * headline.
  *
- *   • The SCROLL sequence scrubs only the opening half. Running the whole clip
- *     would return the visitor to the packed basket at 100% scroll, so the
- *     scroll would read as "nothing happened". We stop at the widest spread.
- *
- *   • The static head of the clip is trimmed off the scroll range too — a
- *     quarter of the runway with no visible change feels broken.
- *
- *   • The HERO reuses that same calm head, slowed and mirrored, so it loops
- *     seamlessly behind the headline instead of cutting.
- *
- * Adjust the four constants below if the footage is ever recut.
+ * On quality: the source is 720p, which is the ceiling. Rather than hand the
+ * browser a 720p file to upscale with bilinear filtering on a retina hero,
+ * this encodes to 1080p through lanczos with a light unsharp pass, at a CRF
+ * low enough that compression is not the thing softening the picture. Encodes
+ * compared side by side at CRF 36 / 28 / 31@1080p / 27@1080p: the jump from
+ * 720p to a sharpened 1080p was the visible one, and CRF 29 sits where extra
+ * bitrate stops buying detail.
  */
 
 import { execFileSync } from 'node:child_process';
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SOURCE = join(root, 'public/video/source');
 const VIDEO_OUT = join(root, 'public/video');
-const FRAMES_OUT = join(root, 'public/frames');
 const STILLS_OUT = join(root, 'public/images');
 
 /* --- the clip's shape, in seconds ------------------------------------- */
 
-/** The calm head: basket packed, breathing. Becomes the hero loop. */
+/** The calm head: the basket settled, roses only just beginning to lift.
+    Slowed and mirrored, this becomes the hero loop. */
 const HERO_START = 0.0;
-const HERO_END = 2.25;
+const HERO_END = 3.1;
 
-/** The opening: from just before motion starts to the widest spread. */
-const SCROLL_START = 1.15;
-const SCROLL_END = 8.35;
+/** How far to stretch it. Enough that the motion reads as a drift. */
+const HERO_SLOW = 1.5;
 
-/** Frames per second for the scroll sequence. Lower this before lowering
-    quality if the sequence gets heavy — scroll rarely outruns 15fps. */
-const FPS = 15;
+/** Delivery size for the hero. The source is 720p; upscaling here with a
+    good filter beats leaving it to the browser on a retina display. */
+const HERO_W = 1920;
+const HERO_H = 1080;
+
+/** VP9 constant quality. Lower is better and larger. */
+const HERO_CRF = 29;
 
 /** The footage is a cool studio white; the site is warm ivory. This pulls it
     into the palette so it does not read as clinical against the cream. */
@@ -105,10 +100,13 @@ const heroDuration = (HERO_END - HERO_START).toFixed(3);
 console.log('→ hero: building a seamless loop from the calm head…');
 
 /* setpts stretches it to a drift; reverse+concat makes the loop join
-   invisible, so there is no cut behind the headline. -an strips the audio
-   track, which a muted autoplay loop has no use for. */
+   invisible, so there is no cut behind the headline. The scale/unsharp pair
+   is what keeps it sharp on a retina hero. -an strips the audio track, which
+   a muted autoplay loop has no use for. */
 const heroFilter =
-  `[0:v]trim=start=${HERO_START}:duration=${heroDuration},setpts=1.9*(PTS-STARTPTS),${WARM}[f];` +
+  `[0:v]trim=start=${HERO_START}:duration=${heroDuration},` +
+  `setpts=${HERO_SLOW}*(PTS-STARTPTS),${WARM},` +
+  `scale=${HERO_W}:${HERO_H}:flags=lanczos,unsharp=5:5:0.45:5:5:0.0[f];` +
   `[f]split[a][b];[b]reverse[r];[a][r]concat=n=2:v=1:a=0[out]`;
 
 run([
@@ -116,72 +114,29 @@ run([
   '-filter_complex', heroFilter,
   '-map', '[out]',
   '-an',
-  '-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', '36', '-row-mt', '1', '-cpu-used', '4',
+  '-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', String(HERO_CRF),
+  '-row-mt', '1', '-cpu-used', '1',
   join(VIDEO_OUT, 'hero.webm'),
 ]);
 
+/* H.264 fallback for the browsers that ship no VP9. */
 run([
   '-i', src,
   '-filter_complex', heroFilter,
   '-map', '[out]',
   '-an',
-  '-c:v', 'libx264', '-crf', '25', '-preset', 'slow', '-pix_fmt', 'yuv420p',
-  '-movflags', '+faststart',
+  '-c:v', 'libx264', '-crf', '26', '-preset', 'slow', '-pix_fmt', 'yuv420p',
+  '-profile:v', 'high', '-movflags', '+faststart',
   join(VIDEO_OUT, 'hero.mp4'),
 ]);
 
 console.log('→ hero: poster frame…');
 run([
-  '-ss', String(HERO_START + 0.4), '-i', src,
-  '-vf', WARM, '-frames:v', '1', '-q:v', '3',
+  '-ss', String(HERO_START + 0.3), '-i', src,
+  '-vf', `${WARM},scale=1600:-1:flags=lanczos,unsharp=5:5:0.4:5:5:0.0`,
+  '-frames:v', '1', '-q:v', '5',
   join(VIDEO_OUT, 'hero-poster.jpg'),
 ]);
-
-/* --- scroll sequence --------------------------------------------------- */
-
-console.log('→ scroll: extracting frames at source resolution…');
-
-rmSync(FRAMES_OUT, { recursive: true, force: true });
-mkdirSync(FRAMES_OUT, { recursive: true });
-
-/* No scale filter, deliberately: downscaling here is the single biggest
-   cause of a blurry scroll section and cannot be undone later. */
-run([
-  '-ss', String(SCROLL_START),
-  '-to', String(SCROLL_END),
-  '-i', src,
-  '-vf', `fps=${FPS},${WARM}`,
-  '-c:v', 'libwebp', '-quality', '74', '-compression_level', '5',
-  '-start_number', '0',
-  join(FRAMES_OUT, 'frame-%03d.webp'),
-]);
-
-const frames = readdirSync(FRAMES_OUT).filter((f) => f.endsWith('.webp'));
-const count = frames.length;
-const bytes = frames.reduce(
-  (sum, f) => sum + statSync(join(FRAMES_OUT, f)).size,
-  0
-);
-
-writeFileSync(
-  join(FRAMES_OUT, 'manifest.json'),
-  `${JSON.stringify(
-    { count, pattern: '/frames/frame-{i}.webp', fps: FPS },
-    null,
-    2
-  )}\n`
-);
-
-console.log(
-  `✓ ${count} frames, ${(bytes / 1024 / 1024).toFixed(1)} MB total`
-);
-
-if (count < 60) {
-  console.warn(`! only ${count} frames — the sequence will feel steppy.`);
-}
-if (bytes > 7 * 1024 * 1024) {
-  console.warn(`! heavy to download. Lower FPS or quality in this script.`);
-}
 
 /* --- stills for the cards --------------------------------------------- */
 

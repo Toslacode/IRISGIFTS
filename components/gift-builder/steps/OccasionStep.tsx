@@ -31,7 +31,7 @@ export function OccasionStep() {
         <div
           role="radiogroup"
           aria-label="מה האירוע"
-          className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4"
+          className="stagger grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4"
         >
           {occasions.map((option) => (
             <ChoiceCard

@@ -5,12 +5,15 @@ import { Reveal } from '@/components/ui/Reveal';
 /* ==========================================================================
    A short look at what the studio makes, and nothing more.
 
-   This is not a catalogue and carries no prices or buttons — its only job is
-   to show the style and finish before the questions begin. Every card is one
-   image and one line.
+   Not a catalogue: no prices, no buttons. Its only job is to show the style
+   and the finish before the questions begin.
+
+   On phones this is a swipe rail rather than a shrunken grid — six cards in
+   a two-column grid pushes the first question a screen and a half further
+   down, and each photo ends up too small to read anyway.
    ========================================================================== */
 
-const cards: { src: string; label: string; span?: string }[] = [
+const cards: { src: string; label: string }[] = [
   { src: '/images/inspiration-1.webp', label: 'מארז לכלה' },
   { src: '/images/inspiration-2.webp', label: 'מארז לזוג' },
   { src: '/images/inspiration-3.webp', label: 'מארז ליולדת' },
@@ -21,41 +24,73 @@ const cards: { src: string; label: string; span?: string }[] = [
 
 export function Inspiration() {
   return (
-    <section id="inspiration" className="shell py-14 sm:py-16">
-      <Reveal className="flex flex-col items-center gap-2 text-center">
+    <section id="inspiration" className="scroll-mt-20 py-12 sm:py-16">
+      <Reveal className="shell flex flex-col items-center gap-2 text-center">
         <h2 className="text-title">קצת השראה</h2>
         <p className="text-lg text-ink-muted">
           כמה מהמארזים שאפשר ליצור אצל איריס
         </p>
       </Reveal>
 
-      {/* Two up on phones, three from tablet on. Six across fits in one band
-          but leaves each photo under 200px — too small for a section whose
-          only job is to show finish and quality. */}
-      <ul className="mt-9 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">
+      {/* Phones: a snapping rail that bleeds off both edges, so the next card
+          is visibly cut and the gesture is discoverable without a hint. */}
+      <ul
+        className="no-scrollbar mt-8 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2 sm:hidden"
+        aria-label="מארזים לדוגמה"
+      >
+        {cards.map((card, index) => (
+          <li
+            key={card.label}
+            style={{ '--d': index } as React.CSSProperties}
+            /* snap-start, not snap-center: at rest the first card should sit against
+               the leading edge with the next one cut, not float in the middle. */
+            className="anim-rise w-[72vw] max-w-[19rem] shrink-0 snap-start"
+          >
+            <Card {...card} sizes="68vw" />
+          </li>
+        ))}
+      </ul>
+
+      {/* Tablet and up: three across, so each photograph is large enough to
+          judge the finish. */}
+      <ul className="shell mt-9 hidden grid-cols-3 gap-5 sm:grid">
         {cards.map((card, index) => (
           <Reveal as="li" key={card.label} delay={index % 3}>
-            <figure className="group m-0 flex flex-col gap-3">
-              <div className="relative overflow-hidden rounded-panel border border-line bg-surface shadow-soft transition-[box-shadow,border-color] duration-300 ease-out-soft group-hover:border-gold-soft group-hover:shadow-lift">
-                <div className="aspect-3/4 overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={card.src}
-                    alt={card.label}
-                    loading="lazy"
-                    decoding="async"
-                    sizes="(max-width: 640px) 50vw, 33vw"
-                    className="size-full object-cover transition-transform duration-[600ms] ease-out-soft group-hover:scale-[1.04]"
-                  />
-                </div>
-              </div>
-              <figcaption className="text-center text-[0.875rem] font-medium text-ink-soft">
-                {card.label}
-              </figcaption>
-            </figure>
+            <Card {...card} sizes="33vw" />
           </Reveal>
         ))}
       </ul>
     </section>
+  );
+}
+
+function Card({
+  src,
+  label,
+  sizes,
+}: {
+  src: string;
+  label: string;
+  sizes: string;
+}) {
+  return (
+    <figure className="group m-0 flex flex-col gap-3">
+      <div className="overflow-hidden rounded-panel border border-line bg-surface shadow-soft transition-[box-shadow,border-color] duration-300 ease-out-soft group-hover:border-gold-soft group-hover:shadow-lift">
+        <div className="aspect-3/4 overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={src}
+            alt={label}
+            loading="lazy"
+            decoding="async"
+            sizes={sizes}
+            className="size-full object-cover transition-transform duration-[600ms] ease-out-soft group-hover:scale-[1.04]"
+          />
+        </div>
+      </div>
+      <figcaption className="text-center text-[0.875rem] font-medium text-ink-soft">
+        {label}
+      </figcaption>
+    </figure>
   );
 }

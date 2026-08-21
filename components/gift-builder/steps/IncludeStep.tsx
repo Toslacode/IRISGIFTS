@@ -29,7 +29,7 @@ export function IncludeStep() {
         <div
           role="group"
           aria-label="מה חשוב שיהיה במארז"
-          className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3"
+          className="stagger grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3"
         >
           {includeCategories.map((option) => (
             <ChoiceCard

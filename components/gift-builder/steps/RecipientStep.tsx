@@ -27,7 +27,7 @@ export function RecipientStep() {
       <div
         role="radiogroup"
         aria-label="למי המתנה"
-        className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4"
+        className="stagger grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4"
       >
         {recipients.map((option) => (
           <ChoiceCard
