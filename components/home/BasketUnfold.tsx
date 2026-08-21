@@ -239,22 +239,26 @@ export function BasketUnfold() {
 const FLOATING: {
   icon: IconName;
   label: string;
-  /** Final resting offset, in percentages of the stage. */
+  /** Resting offset as a fraction of the stage, not of the item itself. */
   x: number;
   y: number;
   /** When this item starts rising, 0–1 along the runway. */
   start: number;
+  /** Diameter as a fraction of the stage, so it scales with the viewport. */
   size: number;
   tone: string;
   rotate: number;
 }[] = [
-  { icon: 'robe', label: 'חלוק', x: -30, y: -30, start: 0.30, size: 96, tone: 'bg-pastel-rose', rotate: -8 },
-  { icon: 'towel', label: 'מגבות', x: 28, y: -34, start: 0.34, size: 88, tone: 'bg-pastel-sky', rotate: 7 },
-  { icon: 'candle', label: 'נר', x: -46, y: -6, start: 0.40, size: 76, tone: 'bg-pastel-sand', rotate: -14 },
-  { icon: 'cream', label: 'טיפוח', x: 45, y: -8, start: 0.44, size: 78, tone: 'bg-pastel-mint', rotate: 12 },
-  { icon: 'chocolate', label: 'שוקולד', x: -14, y: -52, start: 0.50, size: 70, tone: 'bg-pastel-lilac', rotate: 5 },
-  { icon: 'wine', label: 'יין', x: 13, y: -56, start: 0.55, size: 72, tone: 'bg-pastel-sage', rotate: -6 },
+  { icon: 'robe', label: 'חלוק', x: -0.34, y: -0.30, start: 0.24, size: 0.20, tone: 'bg-pastel-rose', rotate: -8 },
+  { icon: 'towel', label: 'מגבות', x: 0.33, y: -0.33, start: 0.28, size: 0.19, tone: 'bg-pastel-sky', rotate: 7 },
+  { icon: 'candle', label: 'נר', x: -0.46, y: -0.02, start: 0.33, size: 0.16, tone: 'bg-pastel-sand', rotate: -14 },
+  { icon: 'cream', label: 'טיפוח', x: 0.46, y: -0.04, start: 0.37, size: 0.165, tone: 'bg-pastel-mint', rotate: 12 },
+  { icon: 'chocolate', label: 'שוקולד', x: -0.15, y: -0.52, start: 0.42, size: 0.15, tone: 'bg-pastel-lilac', rotate: 5 },
+  { icon: 'wine', label: 'יין', x: 0.15, y: -0.55, start: 0.46, size: 0.155, tone: 'bg-pastel-sage', rotate: -6 },
 ];
+
+/** Each item's own 0→1, carved out of the shared scroll progress. */
+const SPAN = 0.3;
 
 function UnfoldScene({ ref }: { ref: React.Ref<HTMLDivElement> }) {
   return (
@@ -264,7 +268,13 @@ function UnfoldScene({ ref }: { ref: React.Ref<HTMLDivElement> }) {
       className="relative size-full bg-[radial-gradient(115%_85%_at_50%_38%,#fdf9f2_0%,#f5ecdd_45%,#ecdfc8_100%)]"
     >
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="relative aspect-square w-[min(78vw,30rem)]">
+        <div
+          className="relative aspect-square w-[min(80vw,32rem)]"
+          /* Offsets below are fractions of this box. A translate percentage
+             resolves against the element itself, so a 96px medallion would
+             barely move — everything is sized from --stage instead. */
+          style={{ '--stage': 'min(80vw, 32rem)' } as React.CSSProperties}
+        >
           {/* Halo — widens as the basket opens */}
           <div
             aria-hidden="true"
@@ -282,20 +292,27 @@ function UnfoldScene({ ref }: { ref: React.Ref<HTMLDivElement> }) {
               className="absolute left-1/2 top-1/2 flex flex-col items-center gap-2"
               style={
                 {
-                  /* clamp((p - start) / span, 0, 1) — each item's own 0→1 */
-                  '--t': `clamp(0, calc((var(--p) - ${item.start}) / 0.34), 1)`,
-                  transform: `translate(-50%, -50%) translate(calc(${item.x} * var(--t) * 1%), calc(${item.y} * var(--t) * 1% + (1 - var(--t)) * 2rem)) rotate(calc(${item.rotate} * var(--t) * 1deg)) scale(calc(0.55 + var(--t) * 0.45))`,
+                  '--t': `clamp(0, calc((var(--p) - ${item.start}) / ${SPAN}), 1)`,
+                  '--size': `calc(var(--stage) * ${item.size})`,
+                  transform: [
+                    'translate(-50%, -50%)',
+                    `translate(calc(${item.x} * var(--t) * var(--stage)), calc(${item.y} * var(--t) * var(--stage) + (1 - var(--t)) * var(--stage) * 0.06))`,
+                    `rotate(calc(${item.rotate} * var(--t) * 1deg))`,
+                    'scale(calc(0.5 + var(--t) * 0.5))',
+                  ].join(' '),
                   opacity: 'var(--t)',
                 } as React.CSSProperties
               }
             >
               <span
                 className={`flex items-center justify-center rounded-full ${item.tone} shadow-lift ring-1 ring-gold/25`}
-                style={{ width: item.size, height: item.size }}
+                style={{ width: 'var(--size)', height: 'var(--size)' }}
               >
                 <Icon
                   name={item.icon}
-                  size={item.size * 0.44}
+                  size={24}
+                  width="44%"
+                  height="44%"
                   strokeWidth={1.1}
                   className="text-ink-soft/75"
                 />
@@ -341,7 +358,7 @@ function UnfoldScene({ ref }: { ref: React.Ref<HTMLDivElement> }) {
       <div
         className="pointer-events-none absolute inset-x-0 bottom-[14%] flex justify-center px-6"
         style={{
-          '--c': 'clamp(0, calc((var(--p) - 0.55) / 0.3), 1)',
+          '--c': 'clamp(0, calc((var(--p) - 0.62) / 0.26), 1)',
           opacity: 'var(--c)',
           transform: 'translateY(calc((1 - var(--c)) * 1.25rem))',
         } as React.CSSProperties}
