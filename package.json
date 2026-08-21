@@ -1,0 +1,31 @@
+{
+  "name": "irisgifts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "IRISGIFTS — guided gift-basket builder for a premium Israeli gift boutique",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "media": "node scripts/prepare-media.mjs",
+    "test": "node tests/run.mjs",
+    "check": "npm run typecheck && npm run test && npm run build"
+  },
+  "dependencies": {
+    "@fontsource-variable/assistant": "^5.3.0",
+    "@fontsource-variable/heebo": "^5.3.0",
+    "next": "16.3.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^24",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~5.9.3"
+  }
+}

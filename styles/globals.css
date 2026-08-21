@@ -1,0 +1,337 @@
+@import 'tailwindcss';
+
+@import '@fontsource-variable/heebo/index.css';
+@import '@fontsource-variable/assistant/index.css';
+
+/* ==========================================================================
+   IRISGIFTS — Design tokens
+   Warm ivory canvas, soft champagne gold, near-black navy ink.
+   Every colour is defined here once; components never hold raw hex.
+   ========================================================================== */
+
+@theme {
+  /* --- Canvas & surfaces ------------------------------------------------ */
+  --color-canvas: #faf6f0; /* warm ivory — the main page ground */
+  --color-canvas-deep: #f3ece2; /* recessed bands, alternating sections */
+  --color-surface: #fffdfa; /* cards, panels */
+  --color-surface-raised: #ffffff;
+
+  /* --- Ink -------------------------------------------------------------- */
+  --color-ink: #16192a; /* near-black navy — headlines */
+  --color-ink-soft: #3d4256; /* body copy */
+  --color-ink-muted: #7c7568; /* warm gray — captions, helper text */
+  --color-ink-faint: #a89f92;
+
+  /* --- Champagne gold --------------------------------------------------- */
+  --color-gold: #c8a86b; /* the brand gold — borders, accents */
+  --color-gold-deep: #a4813f; /* text-on-cream gold, passes 4.5:1 */
+  --color-gold-soft: #e3cfa6; /* hairlines, dividers */
+  --color-gold-wash: #f6efe1; /* selected-card fill */
+
+  /* --- Blush accent ----------------------------------------------------- */
+  --color-blush: #e8cfc8;
+  --color-blush-deep: #9c6a5e;
+  --color-blush-wash: #faf0ec;
+
+  /* --- Pastels for category icons (very subtle) ------------------------- */
+  --color-pastel-sage: #dfe6dc;
+  --color-pastel-sky: #dde5ec;
+  --color-pastel-sand: #eee4d5;
+  --color-pastel-rose: #f0dfdc;
+  --color-pastel-lilac: #e4e0ea;
+  --color-pastel-mint: #dae8e3;
+
+  /* --- Semantic --------------------------------------------------------- */
+  --color-success: #4f7a5c;
+  --color-success-wash: #eaf1eb;
+  --color-danger: #a8443c;
+  --color-danger-wash: #f7ecea;
+
+  /* --- Borders ---------------------------------------------------------- */
+  --color-line: #e9e0d2; /* default hairline */
+  --color-line-strong: #d8c8ad;
+
+  /* --- Media scrims (theme-aware, per video-scroll-site) ---------------- */
+  --color-media-scrim: rgb(22 25 42 / 0.34);
+  --color-media-text: #fdfbf7;
+  --color-media-muted: rgb(253 251 247 / 0.82);
+
+  /* --- Type ------------------------------------------------------------- */
+  --font-display: 'Heebo Variable', 'Heebo', system-ui, sans-serif;
+  --font-body: 'Assistant Variable', 'Assistant', system-ui, sans-serif;
+
+  /* --- Radius ----------------------------------------------------------- */
+  --radius-card: 1.25rem;
+  --radius-panel: 1.75rem;
+  --radius-pill: 999px;
+
+  /* --- Elevation — warm-tinted, never neutral gray ---------------------- */
+  --shadow-soft: 0 1px 2px rgb(89 72 45 / 0.04), 0 4px 16px rgb(89 72 45 / 0.05);
+  --shadow-lift: 0 2px 4px rgb(89 72 45 / 0.05), 0 12px 32px rgb(89 72 45 / 0.09);
+  --shadow-gold: 0 0 0 1px var(--color-gold), 0 8px 28px rgb(168 129 63 / 0.16);
+
+  /* --- Motion ----------------------------------------------------------- */
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* --- Layout ----------------------------------------------------------- */
+  --nav-h: 68px;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink-soft);
+    font-family: var(--font-body);
+    /* Hebrew wants a touch more room than Latin */
+    line-height: 1.65;
+    font-size: 1rem;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    color: var(--color-ink);
+    line-height: 1.15;
+    /* Never negative — it collapses Hebrew letterforms */
+    letter-spacing: 0;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Visible, branded focus ring. Never removed — only restyled. */
+  :focus-visible {
+    outline: 2px solid var(--color-gold-deep);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* Inputs inherit the body face; iOS zooms below 16px so keep the base */
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  input,
+  textarea,
+  select {
+    font-size: max(1rem, 16px);
+  }
+
+  ::selection {
+    background: var(--color-gold-soft);
+    color: var(--color-ink);
+  }
+
+  ::placeholder {
+    color: var(--color-ink-faint);
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+@utility shell {
+  width: 100%;
+  max-width: 78rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+
+  @media (width >= 48rem) {
+    padding-inline: 2rem;
+  }
+
+  @media (width >= 80rem) {
+    padding-inline: 2.5rem;
+  }
+}
+
+@utility shell-narrow {
+  width: 100%;
+  max-width: 46rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+
+  @media (width >= 48rem) {
+    padding-inline: 2rem;
+  }
+}
+
+/* Fluid display sizes — bold but elegant, never cramped */
+@utility text-display {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 6vw, 4.25rem);
+  font-weight: 700;
+  line-height: 1.08;
+}
+
+@utility text-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 3.6vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1.18;
+}
+
+@utility text-heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.2vw, 1.6rem);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* Small caps-ish eyebrow. `uppercase` is a no-op in Hebrew, so we use
+   letter-spacing + weight + colour to mark the label instead. */
+@utility eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--color-gold-deep);
+}
+
+@utility hairline-gold {
+  border: 1px solid var(--color-gold-soft);
+}
+
+/* Media treatment — pulls disparate imagery into one palette */
+@utility media-tone {
+  filter: saturate(0.86) contrast(1.03);
+}
+
+/* ==========================================================================
+   Motion — entrance primitives
+   ========================================================================== */
+
+@media (prefers-reduced-motion: no-preference) {
+  .anim-rise {
+    opacity: 0;
+    transform: translateY(18px);
+    animation: iris-rise 0.7s var(--ease-out-soft) forwards;
+    animation-delay: calc(var(--d, 0) * 110ms);
+  }
+
+  .anim-fade {
+    opacity: 0;
+    animation: iris-fade 0.6s var(--ease-out-soft) forwards;
+    animation-delay: calc(var(--d, 0) * 110ms);
+  }
+
+  /* Applied by the scroll-reveal hook once the element enters the viewport */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(22px);
+    transition:
+      opacity 0.7s var(--ease-out-soft),
+      transform 0.7s var(--ease-out-soft);
+    transition-delay: calc(var(--d, 0) * 90ms);
+  }
+
+  [data-reveal='shown'] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes iris-rise {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes iris-fade {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes iris-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes iris-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes iris-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Elegant skeleton for loading states */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-canvas-deep) 25%,
+    var(--color-gold-wash) 50%,
+    var(--color-canvas-deep) 75%
+  );
+  background-size: 200% 100%;
+  animation: iris-shimmer 1.6s linear infinite;
+}
+
+/* Hide scrollbar on horizontal chip rails without killing scrollability */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "outDir": "tests/.engine-build",
+    "module": "commonjs",
+    "target": "ES2022",
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "strict": false,
+    "baseUrl": ".",
+    "paths": { "@/*": ["./*"] }
+  },
+  "include": ["lib/**/*.ts", "data/**/*.ts", "types/**/*.ts"]
+}
