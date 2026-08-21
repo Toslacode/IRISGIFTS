@@ -1,7 +1,7 @@
 'use client';
 
 import { Icon, type IconName } from '@/components/ui/Icon';
-import { Reveal } from '@/components/ui/Reveal';
+import { Reveal, SplitWords } from '@/components/ui/Reveal';
 import { normalizeWhatsAppNumber } from '@/lib/order';
 import { useStore } from '@/lib/store-context';
 
@@ -53,7 +53,9 @@ export function Visit() {
           <Reveal className="flex flex-col gap-5">
             <div className="flex flex-col gap-2">
               <span className="eyebrow">היכן אנו נמצאים</span>
-              <h2 className="text-title">מוזמנים לקפוץ לחנות</h2>
+              <h2 className="text-title">
+                <SplitWords text="מוזמנים לקפוץ לחנות" />
+              </h2>
               <p className="text-lg leading-relaxed text-ink-soft">
                 אפשר להרכיב את המארז כאן באתר, ואפשר פשוט להגיע ולעצב אותו
                 יחד עם איריס.

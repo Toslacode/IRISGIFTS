@@ -16,7 +16,7 @@ export function ProgressRail() {
   const pct = past ? 100 : (current / total) * 100;
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between gap-4">
         <p className="text-[0.875rem] font-medium text-ink-soft">
           {past ? (
@@ -42,11 +42,14 @@ export function ProgressRail() {
         aria-valuemax={total}
         aria-valuenow={past ? total : current}
         aria-label="התקדמות בבניית המארז"
-        className="h-px w-full bg-line"
+        className="h-[2px] w-full overflow-hidden rounded-pill bg-line"
       >
+        {/* scaleX rather than width: the fill is a transform, so it runs on
+            the compositor and never asks the row to lay itself out again.
+            Right origin because the reading direction is right to left. */}
         <div
-          className="h-full bg-gold transition-[width] duration-500 ease-out-soft"
-          style={{ width: `${pct}%` }}
+          className="h-full w-full origin-right rounded-pill bg-gold shadow-[0_0_10px_rgba(200,168,107,0.55)] transition-transform duration-500 ease-out-soft"
+          style={{ transform: `scaleX(${pct / 100})` }}
         />
       </div>
     </div>

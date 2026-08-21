@@ -29,6 +29,10 @@ interface StepShellProps {
   /** Message under a disabled Continue. */
   blockedHint?: string;
   wide?: boolean;
+  /** True while an auto-advance countdown is running. */
+  advancing?: boolean;
+  /** How long that countdown lasts, so the bar can match it. */
+  advanceMs?: number;
 }
 
 export function StepShell({
@@ -40,6 +44,8 @@ export function StepShell({
   hideNav = false,
   blockedHint,
   wide = false,
+  advancing = false,
+  advanceMs = 1600,
 }: StepShellProps) {
   const { step, next, back, canContinue, direction, embedded } = useBuilder();
   /* One <h1> per document: on the home page the hero owns it. */
@@ -54,18 +60,22 @@ export function StepShell({
       /* Keyed on the step so React remounts and replays the entrance */
       key={step}
       className={cn(
-        'flex w-full flex-col gap-8',
+        'flex w-full flex-col gap-5 sm:gap-8',
         wide ? 'max-w-5xl' : 'max-w-3xl',
         'mx-auto'
       )}
     >
       <header
-        className={cn(enter, 'flex flex-col gap-2 text-center')}
+        className={cn(enter, 'flex flex-col gap-1 text-center sm:gap-2')}
         style={{ '--d': 0 } as React.CSSProperties}
       >
-        <Heading className="text-title">{definition.title}</Heading>
+        <Heading className="font-display text-[1.5rem] font-semibold leading-tight text-ink sm:text-title">
+          {definition.title}
+        </Heading>
         {definition.subtitle && (
-          <p className="text-lg text-ink-muted">{definition.subtitle}</p>
+          <p className="text-[0.9375rem] text-ink-muted sm:text-lg">
+            {definition.subtitle}
+          </p>
         )}
       </header>
 
@@ -75,31 +85,40 @@ export function StepShell({
 
       {!hideNav && (
         <footer
-          className={cn(enter, 'flex flex-col gap-4')}
+          className={cn(enter, 'flex flex-col gap-3 sm:gap-4')}
           style={{ '--d': 2 } as React.CSSProperties}
         >
-          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+          <div className="flex flex-row-reverse items-center justify-between gap-3">
+            <Button
+              onClick={onNext ?? next}
+              disabled={!canContinue}
+              size="lg"
+              className="relative flex-1 overflow-hidden sm:flex-none sm:min-w-44"
+            >
+              {nextLabel}
+              <Icon name="arrow-left" size={18} />
+
+              {/* Fills across the button while the grace period runs, so the
+                  customer can see the move coming and tap again to change
+                  their mind. */}
+              {advancing && (
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-y-0 start-0 bg-white/20 motion-safe:animate-[iris-fill_var(--fill)_linear_forwards]"
+                  style={{ '--fill': `${advanceMs}ms` } as React.CSSProperties}
+                />
+              )}
+            </Button>
+
             <Button
               variant="ghost"
               onClick={back}
               disabled={isFirst}
-              className="sm:min-w-32"
+              className="shrink-0 sm:min-w-32"
             >
               <Icon name="arrow-right" size={18} />
               חזרה
             </Button>
-
-            <div className="flex flex-col gap-2 sm:items-end">
-              <Button
-                onClick={onNext ?? next}
-                disabled={!canContinue}
-                size="lg"
-                className="w-full sm:w-auto sm:min-w-44"
-              >
-                {nextLabel}
-                <Icon name="arrow-left" size={18} />
-              </Button>
-            </div>
           </div>
 
           {/* Gentle, never aggressive — a hint, not an error */}

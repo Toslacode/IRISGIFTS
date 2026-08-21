@@ -23,6 +23,8 @@ interface FieldShellProps {
   hint?: string;
   error?: string;
   optional?: boolean;
+  /** Keeps the hint off phones where the placeholder already carries it. */
+  hintDesktopOnly?: boolean;
   children: (props: {
     id: string;
     'aria-describedby': string | undefined;
@@ -35,6 +37,7 @@ export function FieldShell({
   hint,
   error,
   optional,
+  hintDesktopOnly,
   children,
 }: FieldShellProps) {
   const id = useId();
@@ -43,7 +46,7 @@ export function FieldShell({
   const describedBy = [hintId, errorId].filter(Boolean).join(' ') || undefined;
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1.5 sm:gap-2">
       <label
         htmlFor={id}
         className="flex items-baseline gap-2 text-[0.9375rem] font-semibold text-ink"
@@ -57,7 +60,13 @@ export function FieldShell({
       </label>
 
       {hint && (
-        <p id={hintId} className="text-[0.8125rem] leading-snug text-ink-muted">
+        <p
+          id={hintId}
+          className={cn(
+            'text-[0.8125rem] leading-snug text-ink-muted',
+            hintDesktopOnly && 'hidden sm:block'
+          )}
+        >
           {hint}
         </p>
       )}
@@ -86,6 +95,7 @@ interface TextFieldProps extends Omit<ComponentProps<'input'>, 'id'> {
   hint?: string;
   error?: string;
   optional?: boolean;
+  hintDesktopOnly?: boolean;
 }
 
 export function TextField({
@@ -93,11 +103,18 @@ export function TextField({
   hint,
   error,
   optional,
+  hintDesktopOnly,
   className,
   ...props
 }: TextFieldProps) {
   return (
-    <FieldShell label={label} hint={hint} error={error} optional={optional}>
+    <FieldShell
+      label={label}
+      hint={hint}
+      error={error}
+      optional={optional}
+      hintDesktopOnly={hintDesktopOnly}
+    >
       {(a11y) => (
         <input
           {...a11y}
@@ -118,6 +135,7 @@ interface TextAreaFieldProps extends Omit<ComponentProps<'textarea'>, 'id'> {
   hint?: string;
   error?: string;
   optional?: boolean;
+  hintDesktopOnly?: boolean;
   /** Shows "n / max" under the field. */
   maxLength?: number;
   value?: string;
@@ -128,6 +146,7 @@ export function TextAreaField({
   hint,
   error,
   optional,
+  hintDesktopOnly,
   className,
   maxLength,
   value,
@@ -136,7 +155,13 @@ export function TextAreaField({
   const used = typeof value === 'string' ? value.length : 0;
 
   return (
-    <FieldShell label={label} hint={hint} error={error} optional={optional}>
+    <FieldShell
+      label={label}
+      hint={hint}
+      error={error}
+      optional={optional}
+      hintDesktopOnly={hintDesktopOnly}
+    >
       {(a11y) => (
         <div className="flex flex-col gap-1.5">
           <textarea
@@ -146,15 +171,16 @@ export function TextAreaField({
             maxLength={maxLength}
             className={cn(
               controlBase,
-              'min-h-36 resize-y leading-relaxed',
+              'min-h-20 resize-y leading-relaxed sm:min-h-36',
               error ? 'border-danger' : 'border-line',
               className
             )}
           />
           {maxLength && (
             <span
-              className="text-[0.75rem] text-ink-faint"
-              /* Count is decorative; the field itself is already labelled */
+              /* Decorative — the field is already labelled — and the one
+                 line it costs matters on a phone. */
+              className="hidden text-[0.75rem] text-ink-faint sm:block"
               aria-hidden="true"
             >
               {used} / {maxLength}

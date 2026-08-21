@@ -21,18 +21,18 @@ export function BudgetStep() {
 
   return (
     <StepShell blockedHint="בחרו טווח תקציב או הזינו סכום מדויק">
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4 sm:gap-5">
         <div
           role="radiogroup"
           aria-label="מה התקציב שלכם"
-          className="stagger grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+          className="stagger grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3"
         >
           {budgetBands.map((band) => (
             <ChoiceCard
               key={band.id}
               label={band.label}
               selected={state.budget.bandId === band.id}
-              className="min-h-20"
+              className="min-h-[4.5rem] sm:min-h-20"
               onSelect={() => {
                 dispatch({ type: 'setBudgetBand', value: band.id });
                 setShowExact(false);

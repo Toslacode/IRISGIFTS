@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 
 import { ButtonLink } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
+import { SplitWords } from '@/components/ui/Reveal';
+import { useParallax } from '@/lib/useParallax';
 
 /* ==========================================================================
    The opening screen.
@@ -25,6 +27,10 @@ import { Icon } from '@/components/ui/Icon';
 export function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [ready, setReady] = useState(false);
+  /* The footage drifts more slowly than the page, so the copy appears to
+     float above it as you scroll away. The 1.12 scale is what pays for the
+     drift — without it the translate would expose an edge. */
+  const mediaRef = useParallax<HTMLDivElement>(56);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -53,24 +59,30 @@ export function Hero() {
             or a failed source still looks intentional rather than empty. */}
         <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_15%,#fdf8f0_0%,#f6ead6_38%,#eddcc2_66%,#e2cdb0_100%)]" />
 
-        <video
-          ref={videoRef}
-          /* Absolute, like the layers around it: a statically positioned
-             video paints *below* its absolutely positioned siblings, so the
-             fallback ground would cover the footage entirely. */
-          className={`absolute inset-0 size-full object-cover object-center transition-opacity duration-1000 ease-out-soft ${
-            ready ? 'opacity-100' : 'opacity-0'
-          }`}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          poster="/video/hero-poster.jpg"
+        <div
+          ref={mediaRef}
+          className="absolute inset-0 will-change-transform"
+          style={{ transform: 'translate3d(0, var(--py, 0px), 0) scale(1.12)' }}
         >
-          <source src="/video/hero.webm" type="video/webm" />
-          <source src="/video/hero.mp4" type="video/mp4" />
-        </video>
+          <video
+            ref={videoRef}
+            /* Absolute, like the layers around it: a statically positioned
+               video paints *below* its absolutely positioned siblings, so the
+               fallback ground would cover the footage entirely. */
+            className={`absolute inset-0 size-full object-cover object-center transition-opacity duration-1000 ease-out-soft ${
+              ready ? 'opacity-100' : 'opacity-0'
+            }`}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            poster="/video/hero-poster.jpg"
+          >
+            <source src="/video/hero.webm" type="video/webm" />
+            <source src="/video/hero.mp4" type="video/mp4" />
+          </video>
+        </div>
 
         {/* Two layers instead of one heavy wash. A flat scrim strong enough
             to carry ink text would erase the basket entirely, so the frame
@@ -100,10 +112,10 @@ export function Hero() {
         </span>
 
         <h1
-          className="anim-rise text-display max-w-4xl text-ink"
+          className="text-display max-w-4xl text-ink"
           style={{ '--d': 1 } as React.CSSProperties}
         >
-          המתנה המושלמת מתחילה כאן
+          <SplitWords now text="המתנה המושלמת מתחילה כאן" />
         </h1>
 
         <p

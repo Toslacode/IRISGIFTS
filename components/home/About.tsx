@@ -1,7 +1,7 @@
 'use client';
 
 import { Icon } from '@/components/ui/Icon';
-import { Reveal } from '@/components/ui/Reveal';
+import { Reveal, SplitWords } from '@/components/ui/Reveal';
 
 /* ==========================================================================
    Who Iris is.
@@ -63,7 +63,7 @@ export function About() {
           <Reveal className="flex flex-col gap-3" delay={1}>
             <span className="eyebrow">אודותינו</span>
             <h2 className="text-title">
-              איריס מרכיבה כל מארז בעצמה
+              <SplitWords text="איריס מרכיבה כל מארז בעצמה" />
             </h2>
             <p className="text-lg leading-relaxed text-ink-soft">
               חנות מתנות בקריית אתא, ברחוב העצמאות 27. איריס — הבעלים — מעצבת

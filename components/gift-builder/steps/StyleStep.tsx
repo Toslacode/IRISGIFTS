@@ -1,6 +1,7 @@
 'use client';
 
 import { useBuilder } from '@/components/gift-builder/BuilderContext';
+import { useAutoAdvance } from '@/components/gift-builder/useAutoAdvance';
 import { StepShell } from '@/components/gift-builder/StepShell';
 import { ProductImage } from '@/components/ui/ProductImage';
 import { Icon } from '@/components/ui/Icon';
@@ -22,17 +23,20 @@ const STYLE_IMAGE: Record<StyleId, { src: string; category: CategoryId }> = {
 
 export function StyleStep() {
   const { state, dispatch } = useBuilder();
+  const { schedule, pending, graceMs } = useAutoAdvance();
 
   return (
     <StepShell
       wide
       blockedHint="בחרו סגנון אחד או שניים כדי להמשיך"
+      advancing={pending}
+      advanceMs={graceMs}
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3 sm:gap-4">
         <div
           role="group"
           aria-label="איזה סגנון אתם מחפשים — אפשר לבחור עד שניים"
-          className="stagger grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3"
+          className="stagger grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-3"
         >
           {styles.map((option) => {
             const selected = state.styles.includes(option.id);
@@ -44,32 +48,42 @@ export function StyleStep() {
                 type="button"
                 role="checkbox"
                 aria-checked={selected}
-                onClick={() =>
-                  dispatch({ type: 'toggleStyle', value: option.id })
-                }
+                onClick={() => {
+                  dispatch({ type: 'toggleStyle', value: option.id });
+                  /* Restarts on every tap, so a second style is still
+                     reachable without touching Continue. */
+                  schedule();
+                }}
                 className={cn(
-                  'group relative flex cursor-pointer flex-col overflow-hidden rounded-card border text-start',
+                  /* Phones use the same row shape as every other question —
+                     a thumbnail where the icon would be — so the six styles
+                     cost three short rows instead of three tall cards. */
+                  'group relative flex w-full cursor-pointer items-center gap-2.5',
+                  'min-h-[3.5rem] overflow-hidden rounded-card border px-3 py-2 text-start',
+                  'sm:min-h-0 sm:flex-col sm:items-stretch sm:gap-0 sm:p-0',
                   'transition-[border-color,box-shadow,transform] duration-200 ease-out-soft',
-                  'hover:-translate-y-0.5',
+                  'hover:-translate-y-0.5 active:scale-[0.98]',
                   selected
-                    ? 'border-gold shadow-gold'
-                    : 'border-line shadow-soft hover:border-gold-soft hover:shadow-lift'
+                    ? 'border-gold bg-gold-wash shadow-gold sm:bg-transparent'
+                    : 'border-line bg-surface shadow-soft hover:border-gold-soft hover:shadow-lift'
                 )}
               >
-                <div className="relative aspect-4/3 overflow-hidden">
-                  <ProductImage
-                    src={image.src}
-                    alt={option.label}
-                    category={image.category}
-                    emphasis
-                    className="size-full transition-transform duration-500 ease-out-soft group-hover:scale-[1.04]"
-                    sizes="(max-width: 640px) 50vw, 33vw"
-                  />
+                <span className="relative size-9 shrink-0 overflow-hidden rounded-full sm:size-auto sm:w-full sm:rounded-none">
+                  <span className="block aspect-square overflow-hidden sm:aspect-4/3">
+                    <ProductImage
+                      src={image.src}
+                      alt={option.label}
+                      category={image.category}
+                      emphasis
+                      className="size-full transition-transform duration-500 ease-out-soft group-hover:scale-[1.04]"
+                      sizes="(max-width: 640px) 40px, 33vw"
+                    />
+                  </span>
 
                   <span
                     aria-hidden="true"
                     className={cn(
-                      'absolute end-3 top-3 flex size-7 items-center justify-center rounded-full',
+                      'absolute end-3 top-3 hidden size-7 items-center justify-center rounded-full sm:flex',
                       'transition-[opacity,transform] duration-200 ease-out-soft',
                       selected
                         ? 'scale-100 bg-gold text-white opacity-100'
@@ -78,34 +92,49 @@ export function StyleStep() {
                   >
                     <Icon name="check" size={15} strokeWidth={2.4} />
                   </span>
-                </div>
+                </span>
 
-                <div
+                <span
                   className={cn(
-                    'flex flex-col gap-1 p-4 transition-colors duration-200',
-                    selected ? 'bg-gold-wash' : 'bg-surface'
+                    'flex min-w-0 flex-1 flex-col gap-0.5 transition-colors duration-200',
+                    'sm:flex-none sm:gap-1 sm:p-4',
+                    selected ? 'sm:bg-gold-wash' : 'sm:bg-surface'
                   )}
                 >
-                  <span className="font-display text-[1.0625rem] font-semibold text-ink">
+                  <span className="font-display text-[0.9375rem] font-semibold leading-tight text-ink sm:text-[1.0625rem]">
                     {option.label}
                   </span>
                   {option.hint && (
-                    <span className="text-[0.8125rem] leading-snug text-ink-muted">
+                    <span className="hidden text-[0.8125rem] leading-snug text-ink-muted sm:block">
                       {option.hint}
                     </span>
                   )}
-                </div>
+                </span>
+
+                {/* Row-layout tick, phones only */}
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'flex size-5 shrink-0 items-center justify-center rounded-full sm:hidden',
+                    'transition-[opacity,transform] duration-200 ease-out-soft',
+                    selected ? 'scale-100 bg-gold text-white opacity-100' : 'scale-75 opacity-0'
+                  )}
+                >
+                  <Icon name="check" size={13} strokeWidth={2.4} />
+                </span>
               </button>
             );
           })}
         </div>
 
-        <p className="text-center text-[0.875rem] text-ink-muted" aria-live="polite">
-          {state.styles.length === 0
-            ? 'אפשר לבחור עד שני סגנונות'
-            : state.styles.length === 1
-              ? 'אפשר לבחור עוד סגנון אחד, או להמשיך'
-              : 'בחרתם שני סגנונות — בחירה נוספת תחליף את הראשון'}
+        <p className="text-center text-[0.8125rem] text-ink-muted sm:text-[0.875rem]" aria-live="polite">
+          {pending
+            ? 'ממשיכים בעוד רגע — אפשר לבחור עוד סגנון'
+            : state.styles.length === 0
+              ? 'אפשר לבחור עד שני סגנונות'
+              : state.styles.length === 1
+                ? 'אפשר לבחור עוד סגנון אחד, או להמשיך'
+                : 'בחרתם שני סגנונות — בחירה נוספת תחליף את הראשון'}
         </p>
       </div>
     </StepShell>

@@ -3,7 +3,7 @@
 import { useId, useState } from 'react';
 
 import { Icon, type IconName } from '@/components/ui/Icon';
-import { Reveal } from '@/components/ui/Reveal';
+import { Reveal, SplitWords } from '@/components/ui/Reveal';
 import { useStore } from '@/lib/store-context';
 import { cn } from '@/lib/utils';
 
@@ -56,7 +56,9 @@ export function Pillars() {
       <div className="shell">
         <Reveal className="flex flex-col items-center gap-2 text-center">
           <span className="eyebrow">איך זה עובד אצלנו</span>
-          <h2 className="text-title">שלוש דרכים לקבל מארז</h2>
+          <h2 className="text-title">
+            <SplitWords text="שלוש דרכים לקבל מארז" />
+          </h2>
         </Reveal>
 
         <ul /* items-start so opening one card does not stretch the other two
@@ -81,14 +83,14 @@ function PillarCard({ pillar }: { pillar: Pillar }) {
   return (
     <div
       className={cn(
-        'flex flex-col gap-4 rounded-panel border bg-surface p-6 shadow-soft',
+        'group flex flex-col gap-4 rounded-panel border bg-surface p-6 shadow-soft',
         'transition-[border-color,box-shadow,transform] duration-300 ease-out-soft',
         open
           ? 'border-gold-soft shadow-lift'
           : 'border-line hover:-translate-y-1 hover:border-gold-soft hover:shadow-lift'
       )}
     >
-      <span className="flex size-12 items-center justify-center rounded-full bg-gold-wash text-gold-deep">
+      <span className="flex size-12 items-center justify-center rounded-full bg-gold-wash text-gold-deep transition-transform duration-300 ease-out-soft motion-safe:group-hover:scale-110">
         <Icon name={pillar.icon} size={22} />
       </span>
 

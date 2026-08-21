@@ -54,8 +54,8 @@ export function GiftBuilder() {
         </div>
       </header>
 
-      <main id="main" ref={stageRef} className="shell flex-1 py-10 sm:py-14">
-        <div className="mx-auto flex w-full max-w-4xl flex-col gap-8">
+      <main id="main" ref={stageRef} className="shell flex-1 py-6 sm:py-14">
+        <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 sm:gap-8">
           {hydrated ? (
             <>
               {step !== 'building' && <ProgressRail />}

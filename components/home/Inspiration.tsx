@@ -1,6 +1,7 @@
 'use client';
 
-import { Reveal } from '@/components/ui/Reveal';
+import { Reveal, SplitWords } from '@/components/ui/Reveal';
+import { useParallax } from '@/lib/useParallax';
 
 /* ==========================================================================
    A short look at what the studio makes, and nothing more.
@@ -26,7 +27,9 @@ export function Inspiration() {
   return (
     <section id="inspiration" className="scroll-mt-20 py-12 sm:py-16">
       <Reveal className="shell flex flex-col items-center gap-2 text-center">
-        <h2 className="text-title">קצת השראה</h2>
+        <h2 className="text-title">
+          <SplitWords text="קצת השראה" />
+        </h2>
         <p className="text-lg text-ink-muted">
           כמה מהמארזים שאפשר ליצור אצל איריס
         </p>
@@ -73,19 +76,39 @@ function Card({
   label: string;
   sizes: string;
 }) {
+  /* The photograph drifts inside its frame as the rail scrolls past. Small
+     enough that you read it as depth rather than as movement — the 12%
+     overscale is there purely so the drift never uncovers an edge. */
+  const driftRef = useParallax<HTMLDivElement>(14);
+
   return (
     <figure className="group m-0 flex flex-col gap-3">
-      <div className="overflow-hidden rounded-panel border border-line bg-surface shadow-soft transition-[box-shadow,border-color] duration-300 ease-out-soft group-hover:border-gold-soft group-hover:shadow-lift">
+      <div
+        className={[
+          'overflow-hidden rounded-panel border border-line bg-surface shadow-soft',
+          'transition-[box-shadow,border-color,transform] duration-300 ease-out-soft',
+          'group-hover:border-gold-soft group-hover:shadow-lift',
+          'motion-safe:group-hover:-translate-y-1',
+        ].join(' ')}
+      >
         <div className="aspect-3/4 overflow-hidden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={src}
-            alt={label}
-            loading="lazy"
-            decoding="async"
-            sizes={sizes}
-            className="size-full object-cover transition-transform duration-[600ms] ease-out-soft group-hover:scale-[1.04]"
-          />
+          {/* Two transforms, two elements: the drift follows the scroll frame
+              by frame and must not be transitioned, while the hover scale
+              must. Sharing one element would make the parallax rubbery. */}
+          <div
+            ref={driftRef}
+            className="size-full will-change-transform motion-safe:translate-y-(--py)"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={src}
+              alt={label}
+              loading="lazy"
+              decoding="async"
+              sizes={sizes}
+              className="size-full scale-[1.12] object-cover transition-transform duration-[600ms] ease-out-soft group-hover:scale-[1.17]"
+            />
+          </div>
         </div>
       </div>
       <figcaption className="text-center text-[0.875rem] font-medium text-ink-soft">

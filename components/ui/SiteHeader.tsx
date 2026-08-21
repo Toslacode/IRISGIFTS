@@ -30,9 +30,12 @@ export function SiteHeader({ transparent = false }: { transparent?: boolean }) {
   return (
     <header
       className={cn(
-        'sticky top-0 z-40 h-(--nav-h) transition-[background-color,border-color,backdrop-filter] duration-300',
+        'sticky top-0 z-40 h-(--nav-h)',
+        'transition-[background-color,border-color,box-shadow] duration-400 ease-out-soft',
         solid
-          ? 'border-b border-line bg-canvas/85 backdrop-blur-md'
+          ? /* Once it leaves the hero the bar becomes a pane of glass over
+               whatever is scrolling beneath it, rather than a cream slab. */
+            'glass-panel border-b border-line/70 bg-canvas/82 shadow-soft'
           : 'border-b border-transparent bg-transparent'
       )}
     >

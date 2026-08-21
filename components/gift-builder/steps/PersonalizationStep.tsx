@@ -17,11 +17,12 @@ export function PersonalizationStep() {
 
   return (
     <StepShell skipLabel="לדלג על השלב הזה" onSkip={next}>
-      <div className="flex flex-col gap-6 rounded-panel border border-line bg-surface p-6 shadow-soft sm:p-8">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <div className="flex flex-col gap-3 rounded-panel border border-line bg-surface p-3.5 shadow-soft sm:gap-6 sm:p-8">
+        <div className="grid grid-cols-2 gap-3 sm:gap-6">
           <TextField
             label="שם לרקמה"
             optional
+            hintDesktopOnly
             hint="נרקום אותו על החלוק או המגבת, אם יש כזה במארז"
             placeholder="למשל: שירה"
             value={p.embroideryName}
@@ -32,6 +33,7 @@ export function PersonalizationStep() {
           <TextField
             label="צבע מועדף"
             optional
+            hintDesktopOnly
             hint="לאריזה, לסרט או לרקמה"
             placeholder="למשל: פודרה, לבן, זהב"
             value={p.preferredColor}
@@ -43,6 +45,7 @@ export function PersonalizationStep() {
         <TextField
           label="הקדשה"
           optional
+          hintDesktopOnly
           hint="משפט קצר שנחרוט או נדפיס על אחד הפריטים"
           placeholder="למשל: לשירה שלנו, באהבה"
           value={p.dedication}
@@ -53,6 +56,7 @@ export function PersonalizationStep() {
         <TextAreaField
           label="הערה מיוחדת"
           optional
+          hintDesktopOnly
           hint="כל דבר שכדאי שאיריס תדע לפני שהיא מרכיבה את המארז"
           placeholder="למשל: המקבלת אלרגית לאגוזים, או שזו מתנה לחמות"
           value={p.note}

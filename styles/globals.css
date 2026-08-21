@@ -70,6 +70,23 @@
   --shadow-lift: 0 2px 4px rgb(89 72 45 / 0.05), 0 12px 32px rgb(89 72 45 / 0.09);
   --shadow-gold: 0 0 0 1px var(--color-gold), 0 8px 28px rgb(168 129 63 / 0.16);
 
+  /* --- Liquid glass --------------------------------------------------- */
+  /* A lens, not a slab: a bright rim along the top edge, a warm shade at
+     the foot, and a soft warm cast beneath. The rim is what sells it. */
+  --shadow-glass:
+    inset 0 1px 0 rgb(255 255 255 / 0.65), inset 0 -1px 0 rgb(89 72 45 / 0.07),
+    0 1px 2px rgb(89 72 45 / 0.05), 0 8px 24px rgb(89 72 45 / 0.09);
+  --shadow-glass-lift:
+    inset 0 1px 0 rgb(255 255 255 / 0.8), inset 0 -1px 0 rgb(89 72 45 / 0.08),
+    0 2px 4px rgb(89 72 45 / 0.06), 0 16px 38px rgb(89 72 45 / 0.14);
+  /* On the near-black CTA the rim has to be much brighter to read at all. */
+  --shadow-glass-ink:
+    inset 0 1px 0 rgb(255 255 255 / 0.24), inset 0 -1px 0 rgb(0 0 0 / 0.28),
+    0 1px 2px rgb(22 25 42 / 0.16), 0 10px 26px rgb(22 25 42 / 0.22);
+  --shadow-glass-ink-lift:
+    inset 0 1px 0 rgb(255 255 255 / 0.34), inset 0 -1px 0 rgb(0 0 0 / 0.3),
+    0 2px 6px rgb(22 25 42 / 0.18), 0 18px 40px rgb(22 25 42 / 0.28);
+
   /* --- Motion ----------------------------------------------------------- */
   --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
@@ -230,6 +247,103 @@
 }
 
 /* ==========================================================================
+   Liquid glass
+   --------------------------------------------------------------------------
+   The controls are lenses laid on the cream, not painted chips. Three layers
+   do the work: the element's own translucent fill, a vertical gradient that
+   gives the glass its thickness, and a specular highlight that follows the
+   pointer. Everything sits behind the label (negative z-index inside the
+   element's own stacking context) so no wrapper elements are needed.
+
+   Reserved for controls. The brief asked for calm surfaces, so panels, cards
+   and sections stay opaque — glass is how something says "press me".
+   ========================================================================== */
+
+@utility glass {
+  position: relative;
+  isolation: isolate;
+  backdrop-filter: blur(14px) saturate(175%);
+
+  /* Thickness: light gathers along the top edge and pools again at the foot,
+     the way it does through a real bevelled pane. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      rgb(255 255 255 / var(--glass-top, 0.34)) 0%,
+      rgb(255 255 255 / 0) 46%,
+      rgb(255 255 255 / var(--glass-foot, 0.1)) 100%
+    );
+  }
+
+  /* Specular highlight. `--gx` is written by the pointer hook; with no
+     pointer it stays centred, so the button still catches light. */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(
+      130% 90% at var(--gx, 50%) -25%,
+      rgb(var(--glass-spec-rgb, 255 255 255) / var(--glass-spec, 0.5)),
+      rgb(var(--glass-spec-rgb, 255 255 255) / 0) 62%
+    );
+    transition: opacity 0.35s var(--ease-out-soft);
+  }
+
+  &:hover::after,
+  &:focus-visible::after {
+    opacity: 1;
+  }
+
+  /* On a pointer this dims slightly under the press; on touch, where there
+     was never a hover, the same rule is the tap's flash of light. */
+  &:active::after {
+    opacity: 0.85;
+  }
+
+  &:disabled {
+    backdrop-filter: none;
+  }
+
+  &:disabled::before,
+  &:disabled::after {
+    opacity: 0;
+  }
+}
+
+/* Same lens, tuned for the near-black CTA where a 34% white top edge would
+   look like a smear rather than a rim. */
+@utility glass-ink {
+  --glass-top: 0.2;
+  --glass-foot: 0.04;
+  --glass-spec: 0.3;
+}
+
+/* On a near-white surface a white highlight is invisible, so the light that
+   travels under the cream controls is champagne instead. */
+@utility glass-warm {
+  --glass-spec-rgb: 200 168 107;
+  --glass-spec: 0.4;
+  --glass-top: 0.55;
+  --glass-foot: 0.16;
+}
+
+/* A glass panel for the few surfaces that float over media — the header once
+   it leaves the hero, and the chips sitting on the video. */
+@utility glass-panel {
+  backdrop-filter: blur(18px) saturate(160%);
+}
+
+/* ==========================================================================
    Motion — entrance primitives
    ========================================================================== */
 
@@ -250,11 +364,13 @@
   /* Applied by the scroll-reveal hook once the element enters the viewport */
   [data-reveal] {
     opacity: 0;
-    transform: translateY(22px);
+    /* Small on purpose: past ~16px a reveal stops reading as a fade and
+       starts reading as the layout moving. */
+    transform: translateY(14px);
     transition:
-      opacity 0.7s var(--ease-out-soft),
-      transform 0.7s var(--ease-out-soft);
-    transition-delay: calc(var(--d, 0) * 90ms);
+      opacity 0.55s var(--ease-out-soft),
+      transform 0.55s var(--ease-out-soft);
+    transition-delay: calc(var(--d, 0) * 75ms);
   }
 
   [data-reveal='shown'] {
@@ -280,6 +396,34 @@
 
 @keyframes iris-rise {
   to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Headlines arrive word by word, each one lifting out from behind its own
+   mask. The padding/negative-margin pair keeps Hebrew descenders (ק ן ך ף ץ)
+   clear of the mask edge — without it the clip cuts them off. */
+@media (prefers-reduced-motion: no-preference) {
+  .words .w {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    padding-bottom: 0.16em;
+    margin-bottom: -0.16em;
+  }
+
+  .words .w > span {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(108%);
+    transition:
+      transform 0.62s var(--ease-out-soft),
+      opacity 0.44s var(--ease-out-soft);
+    transition-delay: calc(var(--w, 0) * 58ms + var(--d, 0) * 75ms);
+  }
+
+  .words-now .w > span {
     opacity: 1;
     transform: none;
   }
@@ -351,6 +495,16 @@
 @media (prefers-reduced-motion: no-preference) {
   .anim-pop {
     animation: iris-pop 0.42s var(--ease-out-soft);
+  }
+}
+
+/* The auto-advance grace period, drawn across the continue button. */
+@keyframes iris-fill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
   }
 }
 
