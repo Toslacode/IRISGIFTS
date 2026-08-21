@@ -16,19 +16,25 @@ const base =
   'min-w-0 py-2 ' +
   'transition-[background-color,color,border-color,box-shadow,transform] duration-200 ' +
   'ease-out-soft active:scale-[0.985] ' +
-  'disabled:cursor-not-allowed disabled:opacity-45 disabled:active:scale-100';
+  'disabled:cursor-not-allowed disabled:active:scale-100';
 
 const variants: Record<Variant, string> = {
   primary:
-    'bg-ink text-canvas shadow-soft hover:bg-[#232741] ' +
-    'hover:shadow-lift disabled:hover:bg-ink disabled:hover:shadow-soft',
+    'bg-ink text-canvas shadow-soft hover:bg-[#232741] hover:shadow-lift ' +
+    /* Disabled is a waiting state, not a broken one: a quiet cream chip
+       rather than a faded near-black slab. */
+    'disabled:bg-canvas-deep disabled:text-ink-faint disabled:shadow-none ' +
+    'disabled:border disabled:border-line disabled:hover:bg-canvas-deep',
   secondary:
     'bg-surface text-ink border border-line-strong hover:border-gold ' +
-    'hover:bg-gold-wash disabled:hover:border-line-strong disabled:hover:bg-surface',
+    'hover:bg-gold-wash disabled:opacity-50 disabled:hover:border-line-strong ' +
+    'disabled:hover:bg-surface',
   ghost:
-    'bg-transparent text-ink-soft hover:text-ink hover:bg-canvas-deep',
+    'bg-transparent text-ink-soft hover:text-ink hover:bg-canvas-deep ' +
+    'disabled:opacity-40',
   danger:
-    'bg-danger-wash text-danger border border-transparent hover:border-danger/40',
+    'bg-danger-wash text-danger border border-transparent hover:border-danger/40 ' +
+    'disabled:opacity-50',
 };
 
 const sizes: Record<Size, string> = {

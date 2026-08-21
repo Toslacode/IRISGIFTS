@@ -196,26 +196,31 @@ const stills = [
   { name: 'basket-shabbat-hatan', ss: 3.1, crop: '700:525:290:110' },
   { name: 'hero-still', ss: 1.0, crop: '1280:720:0:0' },
 
+  /* Inspiration cards on the home page. Six moments and six framings from
+     the same clip, chosen so they read as six photographs rather than one
+     basket repeated. 4:5 portrait, all inside the 1280x720 source. */
+  { name: 'inspiration-1', ss: 0.9, crop: '560:700:360:10', portrait: true },
+  { name: 'inspiration-2', ss: 7.0, crop: '560:700:330:10', portrait: true },
+  { name: 'inspiration-3', ss: 5.2, crop: '520:650:60:60', portrait: true },
+  { name: 'inspiration-4', ss: 3.1, crop: '480:600:400:60', portrait: true },
+  { name: 'inspiration-5', ss: 6.3, crop: '520:650:700:40', portrait: true },
+  { name: 'inspiration-6', ss: 8.6, crop: '600:720:340:0', portrait: true },
+
   /* Style cards — one crop each, chosen for mood rather than subject. */
   { name: 'style-clean', ss: 2.0, crop: '600:450:340:150' },
   { name: 'style-luxury', ss: 6.4, crop: '620:465:330:130' },
   { name: 'style-romantic', ss: 7.0, crop: '380:380:390:140' },
   { name: 'style-pampering', ss: 6.6, crop: '360:360:110:210' },
 
-  /* Product thumbnails. Only the items the footage actually shows — a white
-     robe still must not stand in for a powder-pink one. */
-  { name: 'product-robe-white', ss: 6.0, crop: '340:340:680:40', square: true },
-  { name: 'product-towels-pair', ss: 6.0, crop: '300:300:870:300', square: true },
-  { name: 'product-towel-hand', ss: 6.35, crop: '300:300:880:290', square: true },
 ];
 
 console.log('→ stills: cropping editorial imagery from the same clip…');
 
-for (const { name, ss, crop, square } of stills) {
+for (const { name, ss, crop, square, portrait } of stills) {
   run([
     '-ss', String(ss), '-i', src,
     '-frames:v', '1',
-    '-vf', `crop=${crop},scale=${square ? '640:640' : '1100:-1'},${WARM}`,
+    '-vf', `crop=${crop},scale=${square ? '640:640' : portrait ? '760:950' : '1100:-1'},${WARM}`,
     '-c:v', 'libwebp', '-quality', '82',
     join(STILLS_OUT, square ? `../products/${name}.webp` : `${name}.webp`),
   ]);

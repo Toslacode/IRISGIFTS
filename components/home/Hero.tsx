@@ -107,19 +107,17 @@ export function Hero() {
           className="anim-rise max-w-xl text-lg leading-relaxed text-ink-soft sm:text-xl"
           style={{ '--d': 2 } as React.CSSProperties}
         >
-          אנחנו נעזור לכם להרכיב מארז שמתאים בדיוק לאדם, לאירוע ולתקציב שלכם
+          בואו נרכיב יחד מארז שמתאים בדיוק למי שאתם רוצים לשמח
         </p>
 
         <div
           className="anim-rise flex flex-col gap-3 sm:flex-row"
           style={{ '--d': 3 } as React.CSSProperties}
         >
-          <ButtonLink href="/build" size="lg">
-            בואו נתחיל
+          {/* Same page — this drops the customer straight into question one. */}
+          <ButtonLink href="#builder" size="lg">
+            בואו נבנה מארז
             <Icon name="arrow-left" size={18} />
-          </ButtonLink>
-          <ButtonLink href="/baskets" variant="secondary" size="lg">
-            לצפייה במארזים מוכנים
           </ButtonLink>
         </div>
       </div>

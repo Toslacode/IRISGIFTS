@@ -23,7 +23,8 @@ const BEATS = [
 ];
 
 export function BuildingStep() {
-  const { state, dispatch, goTo } = useBuilder();
+  const { state, dispatch, goTo, embedded } = useBuilder();
+  const Heading = embedded ? 'h2' : 'h1';
   const { products, baskets } = useVisibleCatalog();
   const [beat, setBeat] = useState(0);
 
@@ -93,7 +94,7 @@ export function BuildingStep() {
       </div>
 
       <div className="flex flex-col gap-3">
-        <h1 className="text-title">אנחנו מרכיבים לכם את המתנה</h1>
+        <Heading className="text-title">רגע, אנחנו מרכיבים לכם משהו מיוחד…</Heading>
         {/* Announced politely so the change is heard, not interrupted */}
         <p
           key={beat}

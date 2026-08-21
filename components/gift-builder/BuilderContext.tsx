@@ -43,6 +43,12 @@ interface BuilderContextValue {
   /** Which way the current step entered, for the transition. */
   direction: 1 | -1;
   restart: () => void;
+  /** True when the builder sits inside a page that already owns its <h1>,
+      so step titles drop to <h2>. */
+  embedded: boolean;
+  /** The shell hands us its container so step changes move the builder
+      area into view instead of jumping the whole page to the top. */
+  registerStage: (el: HTMLElement | null) => void;
 }
 
 const BuilderContext = createContext<BuilderContextValue | null>(null);
@@ -50,10 +56,13 @@ const BuilderContext = createContext<BuilderContextValue | null>(null);
 export function BuilderProvider({
   children,
   initialAnswers,
+  embedded = false,
 }: {
   children: ReactNode;
-  /** Seeded from the URL when arriving from a category card on the home page. */
+  /** Seeded from the URL when arriving from a deep link. */
   initialAnswers?: Partial<GiftBuilderState>;
+  /** Set on the home page, where the hero already carries the <h1>. */
+  embedded?: boolean;
 }) {
   const [state, dispatch] = useReducer(builderReducer, initialBuilderState);
   const [step, setStep] = useState<StepId>('recipient');
@@ -87,14 +96,35 @@ export function BuilderProvider({
     [step, state]
   );
 
+  const stageRef = useRef<HTMLElement | null>(null);
+
+  const registerStage = useCallback((el: HTMLElement | null) => {
+    stageRef.current = el;
+  }, []);
+
   const goTo = useCallback(
     (target: StepId) => {
       setDirection(stepIds.indexOf(target) >= stepIds.indexOf(step) ? 1 : -1);
       setStep(target);
-      /* Bring the question into view — on mobile the card grid can be tall. */
-      if (typeof window !== 'undefined') {
+
+      if (typeof window === 'undefined') return;
+
+      const stage = stageRef.current;
+      if (!stage) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
       }
+
+      /* Align the builder to just under the sticky header — but only when it
+         has drifted out of place. Re-aligning a stage that is already sitting
+         at the top would yank the page under someone who just tapped a card. */
+      const rect = stage.getBoundingClientRect();
+      if (rect.top >= -40 && rect.top <= 160) return;
+
+      window.scrollTo({
+        top: rect.top + window.scrollY - 72,
+        behavior: 'smooth',
+      });
     },
     [step]
   );
@@ -130,8 +160,22 @@ export function BuilderProvider({
       hydrated,
       direction,
       restart,
+      registerStage,
+      embedded,
     }),
-    [state, step, goTo, next, back, canContinue, hydrated, direction, restart]
+    [
+      state,
+      step,
+      goTo,
+      next,
+      back,
+      canContinue,
+      hydrated,
+      direction,
+      restart,
+      registerStage,
+      embedded,
+    ]
   );
 
   return (

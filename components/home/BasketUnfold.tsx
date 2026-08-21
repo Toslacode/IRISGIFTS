@@ -18,8 +18,15 @@ import { Icon, type IconName } from '@/components/ui/Icon';
    Both are sampled in a rAF loop rather than a scroll listener, which janks.
    ========================================================================== */
 
-/** Where the runway is measured from. 320vh over ~120 frames feels unhurried. */
-const RUNWAY = 'h-[320vh]';
+/**
+ * The scroll runway.
+ *
+ * 320vh reads beautifully in isolation, but the opening is a beat here, not a
+ * destination — the customer should reach the first question in one short
+ * scroll. 180vh keeps the whole burst legible while costing a screen and a half;
+ * the lerp in the loop below absorbs the faster travel.
+ */
+const RUNWAY = 'h-[180vh]';
 
 interface Manifest {
   count: number;

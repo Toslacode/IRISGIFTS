@@ -24,7 +24,7 @@ export function SiteFooter() {
           <h2 id="footer-shop" className="font-display font-semibold text-ink">
             החנות
           </h2>
-          <Link className="flex min-h-11 w-fit items-center text-ink-muted transition-colors duration-200 hover:text-ink" href="/build">
+          <Link className="flex min-h-11 w-fit items-center text-ink-muted transition-colors duration-200 hover:text-ink" href="/#builder">
             בניית מארז אישי
           </Link>
           <Link className="flex min-h-11 w-fit items-center text-ink-muted transition-colors duration-200 hover:text-ink" href="/baskets">

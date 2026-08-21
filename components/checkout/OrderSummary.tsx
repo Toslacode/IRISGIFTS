@@ -89,7 +89,8 @@ function Block({
 }
 
 export function OrderSummary() {
-  const { state, goTo } = useBuilder();
+  const { state, goTo, embedded } = useBuilder();
+  const Heading = embedded ? 'h2' : 'h1';
   const { settings, products } = useStore();
   const [sent, setSent] = useState(false);
 
@@ -114,7 +115,7 @@ export function OrderSummary() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
       <header className="flex flex-col gap-2 text-center">
-        <h1 className="text-title">סיכום ההזמנה</h1>
+        <Heading className="text-title">סיכום ההזמנה</Heading>
         <p className="text-lg text-ink-muted">
           עברו על הפרטים, ואם הכול נכון — שלחו לאיריס
         </p>

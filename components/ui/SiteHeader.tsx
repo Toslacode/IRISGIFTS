@@ -10,8 +10,7 @@ import { cn } from '@/lib/utils';
 
 const links = [
   { href: '/baskets', label: 'מארזים מוכנים' },
-  { href: '/#stories', label: 'רעיונות למתנה' },
-  { href: '/#cta', label: 'איך זה עובד' },
+  { href: '/#inspiration', label: 'השראה' },
 ];
 
 export function SiteHeader({ transparent = false }: { transparent?: boolean }) {
@@ -55,7 +54,7 @@ export function SiteHeader({ transparent = false }: { transparent?: boolean }) {
           </ul>
         </nav>
 
-        <ButtonLink href="/build" size="sm">
+        <ButtonLink href="/#builder" size="sm">
           בניית מארז
         </ButtonLink>
       </div>

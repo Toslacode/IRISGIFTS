@@ -41,9 +41,13 @@ export function StepShell({
   blockedHint,
   wide = false,
 }: StepShellProps) {
-  const { step, next, back, canContinue, direction } = useBuilder();
+  const { step, next, back, canContinue, direction, embedded } = useBuilder();
+  /* One <h1> per document: on the home page the hero owns it. */
+  const Heading = embedded ? 'h2' : 'h1';
   const definition = getStep(step);
   const isFirst = stepIds.indexOf(step) === 0;
+  /* One class drives all three blocks, so the screen arrives as a unit. */
+  const enter = direction === 1 ? 'step-in' : 'step-in step-in-back';
 
   return (
     <div
@@ -56,31 +60,22 @@ export function StepShell({
       )}
     >
       <header
-        className="anim-rise flex flex-col gap-2 text-center"
-        style={
-          {
-            '--d': 0,
-            /* Entering backwards, slide in from the other side */
-            animationName: direction === 1 ? undefined : 'iris-fade',
-          } as React.CSSProperties
-        }
+        className={cn(enter, 'flex flex-col gap-2 text-center')}
+        style={{ '--d': 0 } as React.CSSProperties}
       >
-        <h1 className="text-title">{definition.title}</h1>
+        <Heading className="text-title">{definition.title}</Heading>
         {definition.subtitle && (
           <p className="text-lg text-ink-muted">{definition.subtitle}</p>
         )}
       </header>
 
-      <div
-        className="anim-rise"
-        style={{ '--d': 1 } as React.CSSProperties}
-      >
+      <div className={enter} style={{ '--d': 1 } as React.CSSProperties}>
         {children}
       </div>
 
       {!hideNav && (
         <footer
-          className="anim-rise flex flex-col gap-4"
+          className={cn(enter, 'flex flex-col gap-4')}
           style={{ '--d': 2 } as React.CSSProperties}
         >
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
