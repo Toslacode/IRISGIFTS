@@ -70,7 +70,7 @@ export function IncludeStep() {
             else cancel();
           }}
           className={cn(
-            'flex min-h-12 w-full cursor-pointer items-center gap-2.5 rounded-card border px-3 py-1.5 text-start',
+            'flex min-h-11 w-full cursor-pointer items-center gap-2.5 rounded-card border px-3 py-1.5 text-start',
             'sm:min-h-16 sm:gap-4 sm:px-5 sm:py-4',
             'transition-[border-color,background-color,box-shadow] duration-200 ease-out-soft',
             state.surpriseMe

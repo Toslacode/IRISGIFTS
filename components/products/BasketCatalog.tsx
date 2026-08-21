@@ -6,6 +6,7 @@ import { BasketCard } from '@/components/products/BasketCard';
 import { ButtonLink } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { Reveal } from '@/components/ui/Reveal';
+import { useGlassPointer } from '@/components/ui/useGlassPointer';
 import { occasions } from '@/data/taxonomy';
 import { useStore } from '@/lib/store-context';
 import { cn } from '@/lib/utils';
@@ -116,16 +117,21 @@ function FilterChip({
   active: boolean;
   onClick: () => void;
 }) {
+  const glass = useGlassPointer<HTMLButtonElement>();
+
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={active}
+      {...glass}
       className={cn(
-        'min-h-11 shrink-0 cursor-pointer rounded-pill border px-4 text-[0.9375rem] transition-colors duration-200',
+        'glass min-h-11 shrink-0 cursor-pointer rounded-pill border px-4 text-[0.9375rem]',
+        'transition-[color,background-color,border-color,box-shadow,transform] duration-250 ease-out-soft',
+        'motion-safe:hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]',
         active
-          ? 'border-gold bg-ink text-canvas'
-          : 'border-line bg-surface text-ink-soft hover:border-gold-soft hover:bg-gold-wash hover:text-ink'
+          ? 'glass-ink border-gold bg-ink/90 text-canvas shadow-glass-ink'
+          : 'glass-warm border-line bg-surface/70 text-ink-soft shadow-glass hover:border-gold-soft hover:bg-gold-wash/80 hover:text-ink hover:shadow-glass-lift'
       )}
     >
       {label}

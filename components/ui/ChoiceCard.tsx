@@ -73,7 +73,7 @@ export function ChoiceCard({
            the small breakpoint up. */
         'glass glass-warm',
         'group relative flex w-full cursor-pointer items-center justify-start',
-        'min-h-[3.5rem] gap-2.5 rounded-card border px-3 py-2 text-start',
+        'min-h-[3.25rem] gap-2.5 rounded-card border px-3 py-2 text-start',
         'sm:min-h-[7.5rem] sm:flex-col sm:justify-center sm:gap-3 sm:px-4 sm:py-6 sm:text-center',
         'transition-[border-color,background-color,box-shadow,transform] duration-250 ease-out-soft',
         'motion-safe:hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]',
