@@ -28,7 +28,6 @@
 
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -67,84 +66,6 @@ const OPEN_H = 1440;
 const OPEN_CROP = '576:720:352:0';
 const OPEN_TALL_W = 1152;
 const OPEN_TALL_H = 1440;
-
-/* --- the burned-in mark ------------------------------------------------
-
-   The shop's mark is part of the footage, sitting in the top-right corner at
-   1280x720 — the same corner the site's own header badge occupies, so the two
-   read as one pile. And at that size it is being upscaled about 2.5x by the
-   time it reaches a retina screen, which is what makes it look soft. Nothing
-   can sharpen it; those pixels do not exist. So it is wiped out of every frame
-   and stamped back on smaller and lower, where it is upscaled less and clears
-   the header.
-
-   What goes back on is a single frame of it, not a live block of the footage.
-   Moving a live block was the first attempt and it was wrong: the block
-   carries the background from where the mark used to be, and wherever that
-   disagrees with what it lands on — which is most of the film, since the shot
-   moves — the block's own edge shows as a pane floating over the picture.
-   Blurring the patch to hide the seam only traded that for a worse artefact,
-   a soft haze around the mark. A single frame has neither problem. The mark is
-   a static graphic in the original too, so freezing it loses nothing anyone
-   can see.
-
-   MARK_STILL_AT picks the frame: the mark is fully faded up by then, and of
-   the frames after that it is the one where the jacket behind it is flattest
-   and darkest, so the disc of jacket that comes along reads as the soft shadow
-   the mark already had rather than as detail from somewhere else.
-
-   MARK_WIPE covers every burned-in pixel — disc and scattered stars alike,
-   because anything left behind would read as a ghost beside the moved mark.
-   It is measured off the source at 4x: the disc spans x 955..1205, y 82..329,
-   loose stars reach x 912 and y 70, and the caption beneath starts at y 360.
-   The box keeps real margin beyond all that, since delogo interpolates from a
-   band just inside its own border and a box that grazes the mark ends up
-   interpolating the mark.
-
-   The patch that leaves behind works because the mark sits on the groom's dark
-   jacket: across a low-detail dark field delogo's fill reads as cloth. */
-const MARK_WIPE = { x: 880, y: 52, w: 372, h: 302 };
-const MARK_STILL_AT = '3.17';
-const MARK_SCALE = 0.8;
-/** The disc, and where its centre lands afterwards. */
-const MARK_DISC = { cx: 1080, cy: 206 };
-const MARK_TO = { cx: 1080, cy: 235 };
-/** Half-width of the square cut from the source frame — wide enough to take
-    the loose stars along, since leaving them behind would orphan them beside
-    the moved mark. */
-const MARK_CUT = 170;
-/** Where the stamp fades out and over how many pixels, both after scaling. */
-const MARK_EDGE = 128;
-const MARK_SOFT = 24;
-
-/** Cuts the one frame the mark is stamped from. Returns where to put it. */
-function buildMarkStill(run, src, out) {
-  const box = Math.round(MARK_CUT * 2);
-  const size = Math.round(box * MARK_SCALE);
-  const c = size / 2;
-  const alpha = `255*clip((${MARK_EDGE}-hypot(X-${c}\\,Y-${c}))/${MARK_SOFT}\\,0\\,1)`;
-  run([
-    '-ss', MARK_STILL_AT, '-i', src, '-frames:v', '1', '-update', '1',
-    '-vf',
-    `crop=${box}:${box}:${MARK_DISC.cx - MARK_CUT}:${MARK_DISC.cy - MARK_CUT},` +
-    `scale=${size}:${size}:flags=lanczos,format=rgba,` +
-    `geq=r='r(X\\,Y)':g='g(X\\,Y)':b='b(X\\,Y)':a='${alpha}'`,
-    out,
-  ]);
-  return {
-    x: Math.round(MARK_TO.cx - size / 2),
-    y: Math.round(MARK_TO.cy - size / 2),
-  };
-}
-
-/** Wipe and re-stamp, ending on the label given. The still is input 1. */
-function markChain(at, out) {
-  return (
-    `[0:v]delogo=x=${MARK_WIPE.x}:y=${MARK_WIPE.y}:` +
-    `w=${MARK_WIPE.w}:h=${MARK_WIPE.h}[patched];` +
-    `[patched][1:v]overlay=x=${at.x}:y=${at.y}:format=auto[${out}]`
-  );
-}
 
 /* --- the still-imagery clip's shape, in seconds ------------------------ */
 
@@ -228,13 +149,6 @@ if (existsSync(openingSrc)) {
     },
   ];
 
-  /* The mark is moved at source resolution, before anything is scaled up, so
-     the patch and the stamp are sharpened and graded along with the rest of
-     the frame instead of being pasted on afterwards. */
-  const still = join(tmpdir(), 'irisgifts-opening-mark.png');
-  const at = buildMarkStill(run, openingSrc, still);
-  const graph = (rest) => `${markChain(at, 'm')};[m]${rest}[v]`;
-
   for (const cut of cuts) {
     console.log(`→ opening: ${cut.name}…`);
 
@@ -242,8 +156,7 @@ if (existsSync(openingSrc)) {
        render nothing from the mp4 alone. `-an` strips the audio a muted
        autoplay has no use for. */
     run([
-      '-i', openingSrc, '-i', still, '-an',
-      '-filter_complex', graph(cut.filter), '-map', '[v]', '-r', '24',
+      '-i', openingSrc, '-an', '-vf', cut.filter, '-r', '24',
       '-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', String(cut.vp9),
       '-row-mt', '1', '-cpu-used', '2', '-g', '240',
       join(VIDEO_OUT, `${cut.name}.webm`),
@@ -253,8 +166,7 @@ if (existsSync(openingSrc)) {
        systems actually play — which is why the phone cut's is not an
        afterthought. */
     run([
-      '-i', openingSrc, '-i', still, '-an',
-      '-filter_complex', graph(cut.filter), '-map', '[v]', '-r', '24',
+      '-i', openingSrc, '-an', '-vf', cut.filter, '-r', '24',
       '-c:v', 'libx264', '-crf', String(cut.h264), '-preset', 'slow',
       '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-movflags', '+faststart',
       join(VIDEO_OUT, `${cut.name}.mp4`),
@@ -262,15 +174,13 @@ if (existsSync(openingSrc)) {
 
     /* What the visitor sees before a single byte of video has arrived. */
     run([
-      '-ss', '0.4', '-i', openingSrc, '-i', still,
-      '-frames:v', '1', '-update', '1',
-      '-filter_complex', graph(cut.filter.replace(`${ease},`, '')),
-      '-map', '[v]', '-q:v', '4',
+      '-ss', '0.4', '-i', openingSrc,
+      '-frames:v', '1',
+      '-vf', cut.filter.replace(`${ease},`, ''),
+      '-q:v', '4',
       join(VIDEO_OUT, `${cut.name}-poster.jpg`),
     ]);
   }
-
-  rmSync(still, { force: true });
 
   /* The scroll-scrubbed sequence this replaced. */
   rmSync(FRAMES_OUT, { recursive: true, force: true });
