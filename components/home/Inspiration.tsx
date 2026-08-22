@@ -14,13 +14,16 @@ import { useParallax } from '@/lib/useParallax';
    down, and each photo ends up too small to read anyway.
    ========================================================================== */
 
+/* The shop's own catalogue photography, not stills lifted from the film.
+   Six different kinds of basket rather than six crops of one, so the section
+   shows the range of the work instead of one arrangement six times. */
 const cards: { src: string; label: string }[] = [
-  { src: '/images/inspiration-1.webp', label: 'מארז לכלה' },
-  { src: '/images/inspiration-2.webp', label: 'מארז לזוג' },
-  { src: '/images/inspiration-3.webp', label: 'מארז ליולדת' },
-  { src: '/images/inspiration-4.webp', label: 'מארז שבת חתן' },
-  { src: '/images/inspiration-5.webp', label: 'מארז מפנק' },
-  { src: '/images/inspiration-6.webp', label: 'מארז בהתאמה אישית' },
+  { src: '/images/catalog/bride-shell-large.webp', label: 'מארז כלה בסלסלת צדף' },
+  { src: '/images/catalog/groom-huge.webp', label: 'מארז חתן בהדום' },
+  { src: '/images/catalog/henna-couple-large.webp', label: 'מארז חתן וכלה' },
+  { src: '/images/catalog/barmitzva-kohanim.webp', label: 'סט לחתן בר מצווה' },
+  { src: '/images/catalog/groom-basket.webp', label: 'מארז חתן בסלסלה' },
+  { src: '/images/catalog/bride-set.webp', label: 'סט חלוק ונעלי בית' },
 ];
 
 export function Inspiration() {
@@ -56,7 +59,7 @@ export function Inspiration() {
 
       {/* Tablet and up: two balanced rows of three, in a column narrower than
           the page. Run to the full shell width and each photograph becomes a
-          towering 500px slab that pushes the first question off the screen and
+          towering slab that pushes the first question off the screen and
           leaves the section looking like it is falling off one side. */}
       <ul className="shell mx-auto mt-9 hidden w-full max-w-5xl grid-cols-3 gap-5 sm:grid">
         {cards.map((card, index) => (
@@ -93,7 +96,7 @@ function Card({
           'motion-safe:group-hover:-translate-y-1',
         ].join(' ')}
       >
-        <div className="aspect-3/4 overflow-hidden sm:aspect-4/5">
+        <div className="aspect-square overflow-hidden">
           {/* Two transforms, two elements: the drift follows the scroll frame
               by frame and must not be transitioned, while the hover scale
               must. Sharing one element would make the parallax rubbery. */}

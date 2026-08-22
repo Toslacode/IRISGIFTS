@@ -8,15 +8,20 @@ import { styles } from '@/data/taxonomy';
 import { cn } from '@/lib/utils';
 import type { CategoryId, StyleId } from '@/types';
 
-/* Styles are a visual question, so these cards lead with imagery rather than
-   a label and an icon. Each maps to a category whose placeholder wash reads
-   closest to the mood. */
+/* Styles are a visual question, so these cards lead with imagery: real
+   baskets from the shop's own catalogue, one per style, because the customer
+   is choosing a look and the tile has to show that look rather than a mood.
+
+   "צבעוני ושמח" has no photograph. Every basket the shop has shot is white or
+   silver, and labelling one of those colourful would be a lie the customer
+   only finds out about on delivery — so it keeps the category wash instead,
+   which reads as drawn rather than as a picture that failed to load. */
 const STYLE_IMAGE: Record<StyleId, { src: string; category: CategoryId }> = {
-  luxury: { src: '/images/style-luxury.webp', category: 'judaica' },
-  clean: { src: '/images/style-clean.webp', category: 'towels' },
-  romantic: { src: '/images/style-romantic.webp', category: 'robe' },
-  pampering: { src: '/images/style-pampering.webp', category: 'skincare' },
-  traditional: { src: '', category: 'homeware' },
+  luxury: { src: '/images/catalog/bride-shell-large.webp', category: 'personalized' },
+  clean: { src: '/images/catalog/bride-set.webp', category: 'robe' },
+  romantic: { src: '/images/catalog/mikveh-shell-medium.webp', category: 'personalized' },
+  pampering: { src: '/images/catalog/groom-robe-set.webp', category: 'robe' },
+  traditional: { src: '/images/catalog/barmitzva-kohanim.webp', category: 'judaica' },
   colorful: { src: '', category: 'sweets' },
 };
 
@@ -24,10 +29,7 @@ export function StyleStep() {
   const { state, dispatch } = useBuilder();
 
   return (
-    <StepShell
-      wide
-      blockedHint="בחרו סגנון אחד או שניים כדי להמשיך"
-    >
+    <StepShell blockedHint="בחרו סגנון אחד או שניים כדי להמשיך">
       <div className="flex flex-col gap-3">
         <div
           role="group"
@@ -60,7 +62,7 @@ export function StyleStep() {
                 )}
               >
                 <span className="relative size-9 shrink-0 overflow-hidden rounded-full sm:size-auto sm:w-full sm:rounded-none">
-                  <span className="block aspect-square overflow-hidden sm:aspect-4/3">
+                  <span className="block aspect-square overflow-hidden sm:aspect-4/3 lg:aspect-square">
                     <ProductImage
                       src={image.src}
                       alt={option.label}
@@ -88,7 +90,7 @@ export function StyleStep() {
                 <span
                   className={cn(
                     'flex min-w-0 flex-1 flex-col gap-0.5 transition-colors duration-200',
-                    'sm:flex-none sm:gap-1 sm:p-3 lg:p-2.5',
+                    'sm:flex-none sm:gap-1 sm:p-3 lg:p-2',
                     selected ? 'sm:bg-gold-wash' : 'sm:bg-surface'
                   )}
                 >

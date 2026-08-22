@@ -13,9 +13,14 @@ import { ProgressRail } from '@/components/gift-builder/ProgressRail';
    Where the browsing stops and the building starts.
 
    The same page, but a different surface: the ground darkens a shade, a gold
-   hairline rules the top edge, and the column narrows. The intro line only
-   exists on the very first question — from the second answer onward this is
-   an application, and a marketing heading above it would undercut that.
+   hairline rules the top edge, and the column narrows.
+
+   The intro line stays for the whole flow. It used to disappear after the
+   first answer — the reasoning being that from the second question onward
+   this is an application, not a marketing section — but removing it pulled
+   everything below it 110px up the screen mid-tap, and the browser's scroll
+   anchoring then compensated with a jump of its own. A heading that names
+   the section is a small price for a page that does not move.
    ========================================================================== */
 
 export function HomeBuilder() {
@@ -28,8 +33,6 @@ export function HomeBuilder() {
     registerStage(stageRef.current);
     return () => registerStage(null);
   }, [registerStage]);
-
-  const atStart = step === 'recipient';
 
   return (
     <section
@@ -49,16 +52,14 @@ export function HomeBuilder() {
 
       <div className="shell py-6 sm:py-10 lg:py-12">
         <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 sm:gap-6">
-          {atStart && (
-            <header className="anim-rise flex flex-col items-center gap-1.5 text-center sm:gap-2">
-              <h2 className="font-display text-[1.6rem] font-semibold leading-tight text-ink sm:text-[2.125rem]">
-                בואו נבנה את המתנה שלכם
-              </h2>
-              <p className="text-[0.9375rem] text-ink-muted sm:text-[1.0625rem]">
-                כמה שאלות קצרות ואנחנו כבר נדע מה להציע לכם
-              </p>
-            </header>
-          )}
+          <header className="anim-rise flex flex-col items-center gap-1.5 text-center sm:gap-2">
+            <h2 className="font-display text-[1.6rem] font-semibold leading-tight text-ink sm:text-[2.125rem]">
+              בואו נבנה את המתנה שלכם
+            </h2>
+            <p className="text-[0.9375rem] text-ink-muted sm:text-[1.0625rem]">
+              כמה שאלות קצרות ואנחנו כבר נדע מה להציע לכם
+            </p>
+          </header>
 
           {/* The app surface itself */}
           <div className="rounded-panel border border-line bg-surface px-3.5 py-5 shadow-soft sm:px-8 sm:py-8">

@@ -434,64 +434,88 @@
   }
 }
 
-/* Step transitions. The builder swaps one question for the next in place, so
-   the new screen arrives from the direction the customer is travelling —
-   under RTL the next screen lives to the left, the previous one to the right. */
+/* Step transitions.
+
+   The question changes; the screen does not. An earlier version slid each
+   block in from the side, staggered — which moved every word on the page on
+   every tap and read as the whole thing jumping, even with the scroll
+   position pinned and the height reserved. This only fades, and lifts the new
+   content by three pixels: enough to register as an arrival, far too little
+   to register as movement. */
 @media (prefers-reduced-motion: no-preference) {
-  .step-in {
-    opacity: 0;
-    animation: step-in-fwd 0.38s var(--ease-out-soft) forwards;
-    animation-delay: calc(var(--d, 0) * 70ms);
+  .step-fade {
+    animation: step-fade 0.32s var(--ease-out-soft);
   }
 
-  .step-in-back {
-    animation-name: step-in-back;
+  /* Inside the answer area the options settle in one after another. No
+     travel — they scale up by a hair from where they already are, so a
+     ten-card grid arrives as a ripple rather than as ten things sliding. */
+  .stagger > * {
+    opacity: 0;
+    animation: iris-settle 0.34s var(--ease-out-soft) forwards;
+  }
+}
+
+@keyframes step-fade {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 3px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes iris-settle {
+  from {
+    opacity: 0;
+    transform: scale(0.975);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
 /* Children of a grid arrive one after another rather than as a slab. Driven
    by nth-child so a grid does not have to hand every card an index. */
 @media (prefers-reduced-motion: no-preference) {
-  .stagger > * {
-    opacity: 0;
-    animation: iris-rise 0.5s var(--ease-out-soft) forwards;
-  }
-
   .stagger > *:nth-child(1) {
-    animation-delay: 85ms;
+    animation-delay: 46ms;
   }
   .stagger > *:nth-child(2) {
-    animation-delay: 130ms;
+    animation-delay: 72ms;
   }
   .stagger > *:nth-child(3) {
-    animation-delay: 175ms;
+    animation-delay: 98ms;
   }
   .stagger > *:nth-child(4) {
-    animation-delay: 220ms;
+    animation-delay: 124ms;
   }
   .stagger > *:nth-child(5) {
-    animation-delay: 265ms;
+    animation-delay: 150ms;
   }
   .stagger > *:nth-child(6) {
-    animation-delay: 310ms;
+    animation-delay: 176ms;
   }
   .stagger > *:nth-child(7) {
-    animation-delay: 355ms;
+    animation-delay: 202ms;
   }
   .stagger > *:nth-child(8) {
-    animation-delay: 400ms;
+    animation-delay: 228ms;
   }
   .stagger > *:nth-child(9) {
-    animation-delay: 445ms;
+    animation-delay: 254ms;
   }
   .stagger > *:nth-child(10) {
-    animation-delay: 490ms;
+    animation-delay: 280ms;
   }
   .stagger > *:nth-child(11) {
-    animation-delay: 535ms;
+    animation-delay: 306ms;
   }
   .stagger > *:nth-child(12) {
-    animation-delay: 580ms;
+    animation-delay: 332ms;
   }
 }
 
@@ -539,28 +563,6 @@
 @media (prefers-reduced-motion: reduce) {
   .row-leaving {
     display: none;
-  }
-}
-
-@keyframes step-in-fwd {
-  from {
-    opacity: 0;
-    transform: translate3d(-16px, 0, 0);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes step-in-back {
-  from {
-    opacity: 0;
-    transform: translate3d(16px, 0, 0);
-  }
-  to {
-    opacity: 1;
-    transform: none;
   }
 }
 

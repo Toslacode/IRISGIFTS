@@ -136,16 +136,16 @@ if (existsSync(openingSrc)) {
     {
       name: 'opening-wide',
       filter: `${ease},scale=${OPEN_W}:${OPEN_H}:flags=lanczos,${sharpen},${grade}`,
-      vp9: 24,
-      h264: 22,
+      vp9: 20,
+      h264: 19,
     },
     {
       name: 'opening-tall',
       filter:
         `${ease},crop=${OPEN_CROP},` +
         `scale=${OPEN_TALL_W}:${OPEN_TALL_H}:flags=lanczos,${sharpen},${grade}`,
-      vp9: 27,
-      h264: 23,
+      vp9: 24,
+      h264: 21,
     },
   ];
 

@@ -11,15 +11,24 @@ import { cn } from '@/lib/utils';
 /* ==========================================================================
    One question per screen: heading, the answer surface, then navigation.
 
-   The continue button is disabled until the question is answered, and it
-   explains why rather than leaving the customer guessing.
+   Three things keep this from feeling like a web page and start it feeling
+   like an app.
 
-   Two things keep this from feeling like a web page and start it feeling like
-   an app. The first is the reserved height below: every question occupies the
-   same box whether it has four options or ten, so replacing one with the next
-   moves nothing around it. The second is that the shell is deliberately
-   tighter on a large screen than the old marketing-page spacing was — a
-   question the customer has to scroll to answer is a question they abandon.
+   The reserved height below: every question occupies the same box whether it
+   has four options or ten, so replacing one with the next moves nothing
+   around it.
+
+   The transition: only the two parts that actually change are re-rendered,
+   and they cross-fade in place. Sliding them in from the side — which is
+   what this used to do — moves every word on the screen on every tap, and
+   that movement is what reads as the page jumping even when the scroll
+   position has not shifted by a pixel. The footer is not keyed at all: the
+   Continue button is the thing under the customer's thumb, and it should
+   never blink or move.
+
+   And the shell is deliberately tighter on a large screen than the old
+   marketing-page spacing was — a question the customer has to scroll to
+   answer is a question they abandon.
    ========================================================================== */
 
 /** How long a single-select answer holds before the next question arrives.
@@ -56,27 +65,25 @@ export function StepShell({
   wide = false,
   loose = false,
 }: StepShellProps) {
-  const { step, next, back, canContinue, direction, embedded } = useBuilder();
+  const { step, next, back, canContinue, embedded } = useBuilder();
   /* One <h1> per document: on the home page the opening owns it. */
   const Heading = embedded ? 'h2' : 'h1';
   const definition = getStep(step);
   const isFirst = stepIds.indexOf(step) === 0;
-  /* One class drives all three blocks, so the screen arrives as a unit. */
-  const enter = direction === 1 ? 'step-in' : 'step-in step-in-back';
 
   return (
     <div
-      /* Keyed on the step so React remounts and replays the entrance */
-      key={step}
       className={cn(
         'flex w-full flex-col gap-4 sm:gap-6',
         wide ? 'max-w-5xl' : 'max-w-3xl',
         'mx-auto'
       )}
     >
+      {/* Keyed on the step so the new title fades in over the old one's
+          place rather than swapping between frames. */}
       <header
-        className={cn(enter, 'flex flex-col gap-1 text-center')}
-        style={{ '--d': 0 } as React.CSSProperties}
+        key={`head-${step}`}
+        className="step-fade flex flex-col gap-1 text-center"
       >
         <Heading className="font-display text-[1.5rem] font-semibold leading-tight text-ink sm:text-[1.875rem]">
           {definition.title}
@@ -88,25 +95,19 @@ export function StepShell({
         )}
       </header>
 
-      {/* The reserved box. Questions differ by a couple of rows, not by a
-          screen, so holding one height stops the footer sliding under the
-          customer's thumb between taps. `loose` opts the long screens out. */}
       <div
+        key={`body-${step}`}
         className={cn(
-          enter,
+          'step-fade',
           !loose && !hideNav && 'flex flex-col justify-center',
           !loose && !hideNav && 'min-h-[19rem] sm:min-h-[19.5rem]'
         )}
-        style={{ '--d': 1 } as React.CSSProperties}
       >
         {children}
       </div>
 
       {!hideNav && (
-        <footer
-          className={cn(enter, 'flex flex-col gap-2.5 sm:gap-3')}
-          style={{ '--d': 2 } as React.CSSProperties}
-        >
+        <footer className="flex flex-col gap-2.5 sm:gap-3">
           <div className="flex flex-row-reverse items-center justify-between gap-3">
             <Button
               onClick={onNext ?? next}

@@ -40,8 +40,6 @@ interface BuilderContextValue {
   canContinue: boolean;
   /** True once persisted answers have been read. */
   hydrated: boolean;
-  /** Which way the current step entered, for the transition. */
-  direction: 1 | -1;
   restart: () => void;
   /** True when the builder sits inside a page that already owns its <h1>,
       so step titles drop to <h2>. */
@@ -66,7 +64,6 @@ export function BuilderProvider({
 }) {
   const [state, dispatch] = useReducer(builderReducer, initialBuilderState);
   const [step, setStep] = useState<StepId>('recipient');
-  const [direction, setDirection] = useState<1 | -1>(1);
   const [hydrated, setHydrated] = useState(false);
   const seeded = useRef(false);
 
@@ -104,7 +101,6 @@ export function BuilderProvider({
 
   const goTo = useCallback(
     (target: StepId) => {
-      setDirection(stepIds.indexOf(target) >= stepIds.indexOf(step) ? 1 : -1);
       setStep(target);
 
       if (typeof window === 'undefined') return;
@@ -150,7 +146,6 @@ export function BuilderProvider({
     clearStored(BUILDER_STORAGE_KEY);
     dispatch({ type: 'reset' });
     setStep('recipient');
-    setDirection(1);
   }, []);
 
   const value = useMemo<BuilderContextValue>(
@@ -163,7 +158,6 @@ export function BuilderProvider({
       back,
       canContinue,
       hydrated,
-      direction,
       restart,
       registerStage,
       embedded,
@@ -176,7 +170,6 @@ export function BuilderProvider({
       back,
       canContinue,
       hydrated,
-      direction,
       restart,
       registerStage,
       embedded,

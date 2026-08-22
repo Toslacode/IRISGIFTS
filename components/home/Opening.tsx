@@ -10,8 +10,8 @@ import { SplitWords } from '@/components/ui/Reveal';
    The opening film.
 
    The shop's own footage — a couple under warm bokeh, hands meeting, the ring
-   going on. It plays once, on its own, and then holds on its last frame. No
-   loop and nothing to drag: the visitor watches it and moves on.
+   going on. It starts on its own and runs continuously: the moment it ends it
+   begins again, with no pause on the last frame and nothing to drag.
 
    Two cuts, not one picture cropped harder. A 16:9 frame on a phone held
    upright loses everything but a sliver, so phones get a 4:5 window on the
@@ -82,6 +82,7 @@ export function Opening() {
             }`}
             autoPlay
             muted
+            loop
             playsInline
             preload="auto"
             poster={`/video/opening-${cut}-poster.jpg`}
