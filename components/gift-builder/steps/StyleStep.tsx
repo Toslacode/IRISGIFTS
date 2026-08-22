@@ -1,7 +1,6 @@
 'use client';
 
 import { useBuilder } from '@/components/gift-builder/BuilderContext';
-import { useAutoAdvance } from '@/components/gift-builder/useAutoAdvance';
 import { StepShell } from '@/components/gift-builder/StepShell';
 import { ProductImage } from '@/components/ui/ProductImage';
 import { Icon } from '@/components/ui/Icon';
@@ -23,20 +22,17 @@ const STYLE_IMAGE: Record<StyleId, { src: string; category: CategoryId }> = {
 
 export function StyleStep() {
   const { state, dispatch } = useBuilder();
-  const { schedule, pending, graceMs } = useAutoAdvance();
 
   return (
     <StepShell
       wide
       blockedHint="בחרו סגנון אחד או שניים כדי להמשיך"
-      advancing={pending}
-      advanceMs={graceMs}
     >
-      <div className="flex flex-col gap-3 sm:gap-4">
+      <div className="flex flex-col gap-3">
         <div
           role="group"
           aria-label="איזה סגנון אתם מחפשים — אפשר לבחור עד שניים"
-          className="stagger grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-3"
+          className="stagger grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-6"
         >
           {styles.map((option) => {
             const selected = state.styles.includes(option.id);
@@ -48,12 +44,7 @@ export function StyleStep() {
                 type="button"
                 role="checkbox"
                 aria-checked={selected}
-                onClick={() => {
-                  dispatch({ type: 'toggleStyle', value: option.id });
-                  /* Restarts on every tap, so a second style is still
-                     reachable without touching Continue. */
-                  schedule();
-                }}
+                onClick={() => dispatch({ type: 'toggleStyle', value: option.id })}
                 className={cn(
                   /* Phones use the same row shape as every other question —
                      a thumbnail where the icon would be — so the six styles
@@ -76,14 +67,14 @@ export function StyleStep() {
                       category={image.category}
                       emphasis
                       className="size-full transition-transform duration-500 ease-out-soft group-hover:scale-[1.04]"
-                      sizes="(max-width: 640px) 40px, 33vw"
+                      sizes="(max-width: 640px) 40px, (min-width: 1024px) 170px, 33vw"
                     />
                   </span>
 
                   <span
                     aria-hidden="true"
                     className={cn(
-                      'absolute end-3 top-3 hidden size-7 items-center justify-center rounded-full sm:flex',
+                      'absolute end-2 top-2 hidden size-6 items-center justify-center rounded-full sm:flex',
                       'transition-[opacity,transform] duration-200 ease-out-soft',
                       selected
                         ? 'scale-100 bg-gold text-white opacity-100'
@@ -97,15 +88,15 @@ export function StyleStep() {
                 <span
                   className={cn(
                     'flex min-w-0 flex-1 flex-col gap-0.5 transition-colors duration-200',
-                    'sm:flex-none sm:gap-1 sm:p-4',
+                    'sm:flex-none sm:gap-1 sm:p-3 lg:p-2.5',
                     selected ? 'sm:bg-gold-wash' : 'sm:bg-surface'
                   )}
                 >
-                  <span className="font-display text-[0.9375rem] font-semibold leading-tight text-ink sm:text-[1.0625rem]">
+                  <span className="font-display text-[0.9375rem] font-semibold leading-tight text-ink sm:text-[1rem] lg:text-[0.9375rem]">
                     {option.label}
                   </span>
                   {option.hint && (
-                    <span className="hidden text-[0.8125rem] leading-snug text-ink-muted sm:block">
+                    <span className="hidden text-[0.75rem] leading-snug text-ink-muted sm:block lg:hidden">
                       {option.hint}
                     </span>
                   )}
@@ -128,13 +119,11 @@ export function StyleStep() {
         </div>
 
         <p className="text-center text-[0.8125rem] text-ink-muted sm:text-[0.875rem]" aria-live="polite">
-          {pending
-            ? 'ממשיכים בעוד רגע — אפשר לבחור עוד סגנון'
-            : state.styles.length === 0
-              ? 'אפשר לבחור עד שני סגנונות'
-              : state.styles.length === 1
-                ? 'אפשר לבחור עוד סגנון אחד, או להמשיך'
-                : 'בחרתם שני סגנונות — בחירה נוספת תחליף את הראשון'}
+          {state.styles.length === 0
+            ? 'אפשר לבחור עד שני סגנונות'
+            : state.styles.length === 1
+              ? 'אפשר לבחור עוד סגנון אחד, או להמשיך'
+              : 'בחרתם שני סגנונות — בחירה נוספת תחליף את הראשון'}
         </p>
       </div>
     </StepShell>

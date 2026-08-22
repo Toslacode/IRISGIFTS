@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 import { useBuilder } from '@/components/gift-builder/BuilderContext';
-import { StepShell } from '@/components/gift-builder/StepShell';
+import { ACK_MS, StepShell } from '@/components/gift-builder/StepShell';
 import { ChoiceCard } from '@/components/ui/ChoiceCard';
 import { budgetBands } from '@/data/taxonomy';
 import { cn } from '@/lib/utils';
@@ -36,7 +36,7 @@ export function BudgetStep() {
               onSelect={() => {
                 dispatch({ type: 'setBudgetBand', value: band.id });
                 setShowExact(false);
-                window.setTimeout(next, 220);
+                window.setTimeout(next, ACK_MS);
               }}
             />
           ))}

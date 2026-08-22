@@ -50,7 +50,7 @@ export default function RootLayout({
             offset sits past the right edge and stretches the document. */}
         <a
           href="#main"
-          className="absolute start-0 top-[-100%] z-50 m-2 rounded-card bg-ink px-5 py-3 text-canvas focus:top-2"
+          className="absolute start-0 top-[-100%] z-50 m-2 rounded-card border border-caramel/40 bg-gold px-5 py-3 font-medium text-ink focus:top-2"
         >
           דילוג לתוכן הראשי
         </a>

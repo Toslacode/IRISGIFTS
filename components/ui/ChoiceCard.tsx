@@ -74,7 +74,7 @@ export function ChoiceCard({
         'glass glass-warm',
         'group relative flex w-full cursor-pointer items-center justify-start',
         'min-h-[3.25rem] gap-2.5 rounded-card border px-3 py-2 text-start',
-        'sm:min-h-[7.5rem] sm:flex-col sm:justify-center sm:gap-3 sm:px-4 sm:py-6 sm:text-center',
+        'sm:min-h-[6.25rem] sm:flex-col sm:justify-center sm:gap-2 sm:px-3.5 sm:py-4 sm:text-center',
         'transition-[border-color,background-color,box-shadow,transform] duration-250 ease-out-soft',
         'motion-safe:hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]',
         selected
@@ -89,7 +89,7 @@ export function ChoiceCard({
         aria-hidden="true"
         className={cn(
           'absolute end-1.5 top-1.5 flex size-5 items-center justify-center rounded-full',
-          'sm:end-auto sm:start-3 sm:top-3 sm:size-6',
+          'sm:end-auto sm:start-2.5 sm:top-2.5 sm:size-5',
           'transition-[opacity,transform] duration-200 ease-out-soft',
           selected
             ? 'scale-100 bg-gold text-white opacity-100'
@@ -103,8 +103,8 @@ export function ChoiceCard({
         <span
           aria-hidden="true"
           className={cn(
-            'flex size-8 shrink-0 items-center justify-center rounded-full transition-colors duration-200 sm:size-14',
-            '[&_svg]:size-[18px] sm:[&_svg]:size-[26px]',
+            'flex size-8 shrink-0 items-center justify-center rounded-full transition-colors duration-200 sm:size-11',
+            '[&_svg]:size-[18px] sm:[&_svg]:size-[22px]',
             selected ? 'bg-white/80 text-gold-deep' : TONE_CLASS[tone],
             !selected && 'text-ink-soft'
           )}

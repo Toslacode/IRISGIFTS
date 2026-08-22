@@ -32,6 +32,7 @@ export type IconName =
   | 'tag'
   | 'check'
   | 'close'
+  | 'menu'
   | 'arrow-right'
   | 'arrow-left'
   | 'plus'
@@ -203,6 +204,9 @@ const paths: Record<IconName, ReactElement> = {
   ),
   check: <path d="m4.6 12.6 4.8 4.8L19.4 7.2" />,
   close: <path d="M5.6 5.6 18.4 18.4M18.4 5.6 5.6 18.4" />,
+  /* Two rules, not three: lighter than the usual hamburger and closer to the
+     hairlines the rest of the page is drawn with. */
+  menu: <path d="M4.5 9h15M4.5 15h15" />,
   'arrow-right': <path d="M4.6 12h14.8M13 5.6 19.4 12 13 18.4" />,
   'arrow-left': <path d="M19.4 12H4.6M11 5.6 4.6 12 11 18.4" />,
   plus: <path d="M12 4.8v14.4M4.8 12h14.4" />,

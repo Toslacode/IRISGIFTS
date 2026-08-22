@@ -56,7 +56,7 @@ export function AdminShell({
                     className={cn(
                       'min-h-11 shrink-0 cursor-pointer rounded-pill px-4 text-[0.9375rem] transition-colors duration-200',
                       tab === item.id
-                        ? 'bg-ink font-medium text-canvas'
+                        ? 'bg-gold font-medium text-ink'
                         : 'text-ink-muted hover:bg-canvas-deep hover:text-ink'
                     )}
                   >

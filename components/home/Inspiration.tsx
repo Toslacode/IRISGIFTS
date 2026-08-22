@@ -54,12 +54,14 @@ export function Inspiration() {
         ))}
       </ul>
 
-      {/* Tablet and up: three across, so each photograph is large enough to
-          judge the finish. */}
-      <ul className="shell mt-9 hidden grid-cols-3 gap-5 sm:grid">
+      {/* Tablet and up: two balanced rows of three, in a column narrower than
+          the page. Run to the full shell width and each photograph becomes a
+          towering 500px slab that pushes the first question off the screen and
+          leaves the section looking like it is falling off one side. */}
+      <ul className="shell mx-auto mt-9 hidden w-full max-w-5xl grid-cols-3 gap-5 sm:grid">
         {cards.map((card, index) => (
           <Reveal as="li" key={card.label} delay={index % 3}>
-            <Card {...card} sizes="33vw" />
+            <Card {...card} sizes="(min-width: 1024px) 320px, 33vw" />
           </Reveal>
         ))}
       </ul>
@@ -91,7 +93,7 @@ function Card({
           'motion-safe:group-hover:-translate-y-1',
         ].join(' ')}
       >
-        <div className="aspect-3/4 overflow-hidden">
+        <div className="aspect-3/4 overflow-hidden sm:aspect-4/5">
           {/* Two transforms, two elements: the drift follows the scroll frame
               by frame and must not be transitioned, while the hover scale
               must. Sharing one element would make the parallax rubbery. */}

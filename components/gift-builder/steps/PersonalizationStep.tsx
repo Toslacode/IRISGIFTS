@@ -17,8 +17,12 @@ export function PersonalizationStep() {
 
   return (
     <StepShell skipLabel="לדלג על השלב הזה" onSkip={next}>
-      <div className="flex flex-col gap-3 rounded-panel border border-line bg-surface p-3.5 shadow-soft sm:gap-6 sm:p-8">
-        <div className="grid grid-cols-2 gap-3 sm:gap-6">
+      {/* Two columns all the way down on a wide screen: stacking the last two
+          fields under a two-up row costs a third of the viewport for nothing,
+          and the whole point of this step is that it never feels like a form
+          the customer has to work through. */}
+      <div className="flex flex-col gap-3 rounded-panel border border-line bg-surface p-3.5 shadow-soft sm:gap-4 sm:p-5 lg:grid lg:grid-cols-2 lg:gap-x-6 lg:gap-y-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:contents">
           <TextField
             label="שם לרקמה"
             optional

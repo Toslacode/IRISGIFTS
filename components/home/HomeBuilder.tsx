@@ -47,23 +47,23 @@ export function HomeBuilder() {
         className="h-px w-full bg-linear-to-l from-transparent via-gold to-transparent"
       />
 
-      <div className="shell py-6 sm:py-20">
-        <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 sm:gap-8">
+      <div className="shell py-6 sm:py-10 lg:py-12">
+        <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 sm:gap-6">
           {atStart && (
             <header className="anim-rise flex flex-col items-center gap-1.5 text-center sm:gap-2">
-              <h2 className="font-display text-[1.6rem] font-semibold leading-tight text-ink sm:text-title">
+              <h2 className="font-display text-[1.6rem] font-semibold leading-tight text-ink sm:text-[2.125rem]">
                 בואו נבנה את המתנה שלכם
               </h2>
-              <p className="text-[0.9375rem] text-ink-muted sm:text-lg">
+              <p className="text-[0.9375rem] text-ink-muted sm:text-[1.0625rem]">
                 כמה שאלות קצרות ואנחנו כבר נדע מה להציע לכם
               </p>
             </header>
           )}
 
           {/* The app surface itself */}
-          <div className="rounded-panel border border-line bg-surface px-3.5 py-5 shadow-soft sm:px-10 sm:py-12">
+          <div className="rounded-panel border border-line bg-surface px-3.5 py-5 shadow-soft sm:px-8 sm:py-8">
             {hydrated ? (
-              <div className="flex flex-col gap-5 sm:gap-8">
+              <div className="flex flex-col gap-5 sm:gap-6">
                 {step !== 'building' && <ProgressRail />}
                 <BuilderStage />
               </div>

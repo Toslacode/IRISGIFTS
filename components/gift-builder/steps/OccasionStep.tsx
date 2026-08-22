@@ -1,7 +1,7 @@
 'use client';
 
 import { useBuilder } from '@/components/gift-builder/BuilderContext';
-import { StepShell } from '@/components/gift-builder/StepShell';
+import { ACK_MS, StepShell } from '@/components/gift-builder/StepShell';
 import { ChoiceCard } from '@/components/ui/ChoiceCard';
 import { Icon, type IconName } from '@/components/ui/Icon';
 import { TextField } from '@/components/ui/Field';
@@ -31,7 +31,7 @@ export function OccasionStep() {
         <div
           role="radiogroup"
           aria-label="מה האירוע"
-          className="stagger grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-4"
+          className="stagger grid grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-4"
         >
           {occasions.map((option) => (
             <ChoiceCard
@@ -43,7 +43,7 @@ export function OccasionStep() {
               onSelect={() => {
                 dispatch({ type: 'setOccasion', value: option.id });
                 /* "אחר" needs a follow-up, so don't jump ahead. */
-                if (option.id !== 'other') window.setTimeout(next, 220);
+                if (option.id !== 'other') window.setTimeout(next, ACK_MS);
               }}
             />
           ))}

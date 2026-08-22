@@ -1,7 +1,6 @@
 'use client';
 
 import { useBuilder } from '@/components/gift-builder/BuilderContext';
-import { useAutoAdvance } from '@/components/gift-builder/useAutoAdvance';
 import { StepShell } from '@/components/gift-builder/StepShell';
 import { ChoiceCard } from '@/components/ui/ChoiceCard';
 import { Icon, type IconName } from '@/components/ui/Icon';
@@ -23,19 +22,16 @@ const ICONS: Record<CategoryId, IconName> = {
 
 export function IncludeStep() {
   const { state, dispatch } = useBuilder();
-  const { schedule, cancel, pending, graceMs } = useAutoAdvance();
 
   return (
     <StepShell
       blockedHint="בחרו לפחות פריט אחד, או תנו לנו לבחור"
-      advancing={pending}
-      advanceMs={graceMs}
     >
       <div className="flex flex-col gap-2.5 sm:gap-5">
         <div
           role="group"
           aria-label="מה חשוב שיהיה במארז"
-          className="stagger grid grid-cols-2 gap-1.5 sm:gap-4 md:grid-cols-3"
+          className="stagger grid grid-cols-2 gap-1.5 sm:gap-3 md:grid-cols-3 lg:grid-cols-5"
         >
           {includeCategories.map((option) => (
             <ChoiceCard
@@ -45,13 +41,7 @@ export function IncludeStep() {
               role="checkbox"
               selected={state.includeCategories.includes(option.id)}
               icon={<Icon name={ICONS[option.id]} size={26} />}
-              /* This question expects several picks, so tapping a category
-                 never starts a countdown — it only cancels one already
-                 running from the "choose for me" card. */
-              onSelect={() => {
-                dispatch({ type: 'toggleCategory', value: option.id });
-                cancel();
-              }}
+              onSelect={() => dispatch({ type: 'toggleCategory', value: option.id })}
             />
           ))}
         </div>
@@ -66,12 +56,10 @@ export function IncludeStep() {
             const nextValue = !state.surpriseMe;
             dispatch({ type: 'setSurpriseMe', value: nextValue });
             /* "choose for me" is the whole answer — move on. */
-            if (nextValue) schedule();
-            else cancel();
           }}
           className={cn(
             'flex min-h-11 w-full cursor-pointer items-center gap-2.5 rounded-card border px-3 py-1.5 text-start',
-            'sm:min-h-16 sm:gap-4 sm:px-5 sm:py-4',
+            'sm:min-h-14 sm:gap-3.5 sm:px-5 sm:py-3',
             'transition-[border-color,background-color,box-shadow] duration-200 ease-out-soft',
             state.surpriseMe
               ? 'border-gold bg-gold-wash shadow-gold'

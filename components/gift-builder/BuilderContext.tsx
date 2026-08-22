@@ -110,16 +110,21 @@ export function BuilderProvider({
       if (typeof window === 'undefined') return;
 
       const stage = stageRef.current;
-      if (!stage) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        return;
-      }
+      if (!stage) return;
 
-      /* Align the builder to just under the sticky header — but only when it
-         has drifted out of place. Re-aligning a stage that is already sitting
-         at the top would yank the page under someone who just tapped a card. */
+      /* Answering a question should move the question and nothing else. The
+         page only re-aligns when the builder has genuinely drifted off the
+         screen — someone who scrolled a long way into the recommendation and
+         then went back to a short question would otherwise be left staring
+         at empty space.
+
+         The band is deliberately wide: half a viewport either side of a clean
+         alignment still counts as "you can see it, leave it alone". Inside
+         that band the scroll position is untouched, which is what stops the
+         jump the shop reported. */
       const rect = stage.getBoundingClientRect();
-      if (rect.top >= -40 && rect.top <= 160) return;
+      const viewport = window.innerHeight;
+      if (rect.top > -viewport * 0.5 && rect.top < viewport * 0.5) return;
 
       window.scrollTo({
         top: rect.top + window.scrollY - 72,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useBuilder } from '@/components/gift-builder/BuilderContext';
-import { StepShell } from '@/components/gift-builder/StepShell';
+import { ACK_MS, StepShell } from '@/components/gift-builder/StepShell';
 import { ChoiceCard } from '@/components/ui/ChoiceCard';
 import { Icon, type IconName } from '@/components/ui/Icon';
 import { recipients } from '@/data/taxonomy';
@@ -27,7 +27,7 @@ export function RecipientStep() {
       <div
         role="radiogroup"
         aria-label="למי המתנה"
-        className="stagger grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-4"
+        className="stagger grid grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-4"
       >
         {recipients.map((option) => (
           <ChoiceCard
@@ -39,7 +39,7 @@ export function RecipientStep() {
             onSelect={() => {
               dispatch({ type: 'setRecipient', value: option.id });
               /* Selecting is the answer — move on without a second tap. */
-              window.setTimeout(next, 220);
+              window.setTimeout(next, ACK_MS);
             }}
           />
         ))}

@@ -130,7 +130,7 @@ function FilterChip({
         'transition-[color,background-color,border-color,box-shadow,transform] duration-250 ease-out-soft',
         'motion-safe:hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]',
         active
-          ? 'glass-ink border-gold bg-ink/90 text-canvas shadow-glass-ink'
+          ? 'glass-gold border-caramel/40 bg-gold text-ink shadow-glass-gold'
           : 'glass-warm border-line bg-surface/70 text-ink-soft shadow-glass hover:border-gold-soft hover:bg-gold-wash/80 hover:text-ink hover:shadow-glass-lift'
       )}
     >

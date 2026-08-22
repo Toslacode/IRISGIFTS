@@ -312,24 +312,48 @@ export function OrderSummary() {
         </p>
       </section>
 
-      <div className="flex flex-col gap-3">
+      {/* The end of the flow, and it has to look like it. Everything above is
+          review; this is the one thing left to do, so it gets its own lit
+          panel, the total beside it and the largest control on the page. */}
+      <section className="flex flex-col gap-4 rounded-panel border border-gold bg-[radial-gradient(110%_130%_at_50%_0%,#fdf7ec_0%,#f7ecd9_100%)] p-6 text-center shadow-glass sm:p-8">
+        <div className="flex flex-col gap-1.5">
+          <h2 className="font-display text-[1.375rem] font-semibold text-ink sm:text-[1.625rem]">
+            נשאר רק לשלוח
+          </h2>
+          <p className="text-[0.9375rem] leading-relaxed text-ink-muted">
+            ההודעה נכתבת מהתשובות שלכם — המארז, הברכה, המשלוח והפרטים. נפתח
+            וואטסאפ עם הכול מוכן, אתם רק לוחצים שליחה.
+          </p>
+        </div>
+
         <ButtonLink
           href={link}
           target="_blank"
           rel="noopener noreferrer"
           size="lg"
           onClick={() => setSent(true)}
-          className="w-full"
+          className="w-full text-[1.0625rem]"
         >
-          <Icon name="whatsapp" size={20} />
-          שלחו את ההזמנה לאיריס
+          <Icon name="whatsapp" size={22} />
+          שליחת ההזמנה לאיריס בוואטסאפ
         </ButtonLink>
 
-        <Button variant="ghost" onClick={() => goTo('recommendation')}>
-          <Icon name="arrow-right" size={18} />
-          חזרה לעריכת המארז
-        </Button>
-      </div>
+        <p className="text-[0.875rem] text-ink-soft">
+          סה"כ להזמנה:{' '}
+          <span className="font-display font-semibold tabular-nums text-ink">
+            {formatPrice(totals.total)}
+          </span>
+        </p>
+      </section>
+
+      <Button
+        variant="ghost"
+        onClick={() => goTo('recommendation')}
+        className="mx-auto"
+      >
+        <Icon name="arrow-right" size={18} />
+        חזרה לעריכת המארז
+      </Button>
 
       {/* Success state — WhatsApp opens in a new tab, so this tab confirms
           what just happened rather than looking like nothing did. */}

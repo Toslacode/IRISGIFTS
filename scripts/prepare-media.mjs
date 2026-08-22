@@ -4,13 +4,18 @@
  *
  *   npm run media
  *
- * Source: public/video/source/basket-burst.mp4 — a white bridal basket that
- * sits packed, bursts open, and then collapses back together.
+ * Sources:
+ *   public/video/source/opening-rings.mp4 — the shop's own film: a couple
+ *     under warm bokeh, hands meeting, the ring going on. This is the
+ *     opening, and the visitor scrubs it with their scroll, so it is cut
+ *     into a frame sequence rather than encoded as a video.
+ *   public/video/source/basket-burst.mp4 — a white bridal basket opening.
+ *     No longer a video moment; it is only the quarry for the still imagery
+ *     the cards use.
  *
- * The site has exactly one video moment: the hero. It takes the calm head of
- * the clip — the basket settled, just beginning to stir — slows it, then
- * mirrors it so the loop closes on itself instead of cutting behind the
- * headline.
+ * The site has exactly one video moment: the opening. It is scroll-driven,
+ * so the arc has to be one continuous transformation with a clear start and
+ * end — which is why the window below skips the clip's head and tail.
  *
  * On quality: the source is 720p, which is the ceiling. Rather than hand the
  * browser a 720p file to upscale with bilinear filtering on a retina hero,
@@ -22,7 +27,7 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -30,8 +35,29 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SOURCE = join(root, 'public/video/source');
 const VIDEO_OUT = join(root, 'public/video');
 const STILLS_OUT = join(root, 'public/images');
+const FRAMES_OUT = join(root, 'public/frames');
 
-/* --- the clip's shape, in seconds ------------------------------------- */
+/* --- the opening film, scrubbed on scroll ------------------------------ */
+
+/** The window that carries the arc: hands apart, the ring, hands together.
+    The first second and the last are the clip settling and are not part of
+    the movement, so scrubbing them reads as dead runway. */
+const OPEN_START = 1.1;
+const OPEN_LENGTH = 8.0;
+
+/** 10fps across 8 seconds is 80 frames. The scrub lerps between them, so a
+    higher rate buys nothing you can see and costs a megabyte a step. */
+const OPEN_FPS = 10;
+
+/** The source is 720p. Lanczos to 1080p with a light unsharp pass beats
+    handing the browser a 720p frame to stretch across a retina hero — and
+    on this footage it is nearly free, because the bokeh dominates the
+    bitrate and lowering WebP quality below 72 saves under 8%. */
+const OPEN_W = 1920;
+const OPEN_H = 1080;
+const OPEN_QUALITY = 72;
+
+/* --- the still-imagery clip's shape, in seconds ------------------------ */
 
 /** The calm head: the basket settled, roses only just beginning to lift.
     Slowed and mirrored, this becomes the hero loop. */
@@ -83,15 +109,57 @@ const run = (args) =>
   execFileSync(ffmpeg, ['-v', 'error', '-y', ...args], { stdio: 'inherit' });
 
 const src = join(SOURCE, 'basket-burst.mp4');
-
-if (!existsSync(src)) {
-  console.log(`· no source clip at ${src}`);
-  console.log('  The site falls back to its composed scroll scene.');
-  process.exit(0);
-}
+const openingSrc = join(SOURCE, 'opening-rings.mp4');
 
 mkdirSync(VIDEO_OUT, { recursive: true });
 mkdirSync(STILLS_OUT, { recursive: true });
+
+/* --- the opening: one frame sequence, scrubbed on scroll --------------- */
+
+if (existsSync(openingSrc)) {
+  console.log('→ opening: cutting the film into scroll frames…');
+
+  /* Rebuilt from scratch each run, so a shorter window never leaves the
+     tail of a longer one behind for the canvas to run past. */
+  rmSync(FRAMES_OUT, { recursive: true, force: true });
+  mkdirSync(FRAMES_OUT, { recursive: true });
+
+  run([
+    '-ss', String(OPEN_START), '-t', String(OPEN_LENGTH), '-i', openingSrc,
+    '-vf',
+    `fps=${OPEN_FPS},scale=${OPEN_W}:${OPEN_H}:flags=lanczos,` +
+      'unsharp=5:5:0.40:5:5:0.0,eq=saturation=0.95:contrast=1.03',
+    '-c:v', 'libwebp', '-quality', String(OPEN_QUALITY), '-start_number', '0',
+    join(FRAMES_OUT, 'frame-%03d.webp'),
+  ]);
+
+  const count = readdirSync(FRAMES_OUT).filter((f) => f.endsWith('.webp')).length;
+
+  /* The canvas reads this rather than carrying a hardcoded count that drifts
+     out of step with the files the moment the window changes. */
+  writeFileSync(
+    join(FRAMES_OUT, 'manifest.json'),
+    `${JSON.stringify({ count, width: OPEN_W, height: OPEN_H }, null, 2)}\n`
+  );
+
+  /* First paint, before a single frame has arrived. */
+  run([
+    '-ss', String(OPEN_START), '-i', openingSrc,
+    '-frames:v', '1',
+    '-vf', `scale=${OPEN_W}:-1:flags=lanczos,unsharp=5:5:0.40:5:5:0.0`,
+    '-q:v', '4',
+    join(FRAMES_OUT, 'poster.jpg'),
+  ]);
+
+  console.log(`✓ ${count} opening frames written to public/frames`);
+} else {
+  console.log(`· no opening film at ${openingSrc} — leaving public/frames alone`);
+}
+
+if (!existsSync(src)) {
+  console.log(`· no still-imagery clip at ${src} — nothing more to do`);
+  process.exit(0);
+}
 
 const heroDuration = (HERO_END - HERO_START).toFixed(3);
 

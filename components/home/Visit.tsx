@@ -64,7 +64,7 @@ export function Visit() {
 
             <a
               href={`tel:${tel}`}
-              className="flex min-h-14 w-fit items-center gap-3 rounded-pill bg-ink px-7 text-lg font-medium text-canvas shadow-soft transition-[background-color,box-shadow,transform] duration-200 ease-out-soft hover:bg-[#232741] hover:shadow-lift active:scale-[0.985]"
+              className="glass glass-gold flex min-h-14 w-fit items-center gap-3 rounded-pill border border-caramel/40 bg-gold px-7 text-lg font-medium text-ink shadow-glass-gold transition-[background-color,border-color,box-shadow,transform] duration-250 ease-out-soft hover:border-caramel/55 hover:bg-gold-lit hover:shadow-glass-gold-lift motion-safe:hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.985]"
             >
               <Icon name="phone" size={19} />
               <span dir="ltr">{settings.storePhone}</span>

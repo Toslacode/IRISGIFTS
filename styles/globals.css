@@ -23,10 +23,12 @@
   --color-ink-faint: #a89f92;
 
   /* --- Champagne gold --------------------------------------------------- */
-  --color-gold: #c8a86b; /* the brand gold — borders, accents */
+  --color-gold: #c8a86b; /* the brand gold — the primary button, borders */
+  --color-gold-lit: #dcbd85; /* lifted champagne — the primary on hover */
+  --color-caramel: #b08a4e; /* soft caramel — the primary's rim, pressed state */
   --color-gold-deep: #a4813f; /* text-on-cream gold, passes 4.5:1 */
   --color-gold-soft: #e3cfa6; /* hairlines, dividers */
-  --color-gold-wash: #f6efe1; /* selected-card fill */
+  --color-gold-wash: #f6efe1; /* selected-card fill, the secondary button */
 
   /* --- Blush accent ----------------------------------------------------- */
   --color-blush: #e8cfc8;
@@ -80,12 +82,15 @@
     inset 0 1px 0 rgb(255 255 255 / 0.8), inset 0 -1px 0 rgb(89 72 45 / 0.08),
     0 2px 4px rgb(89 72 45 / 0.06), 0 16px 38px rgb(89 72 45 / 0.14);
   /* On the near-black CTA the rim has to be much brighter to read at all. */
-  --shadow-glass-ink:
-    inset 0 1px 0 rgb(255 255 255 / 0.24), inset 0 -1px 0 rgb(0 0 0 / 0.28),
-    0 1px 2px rgb(22 25 42 / 0.16), 0 10px 26px rgb(22 25 42 / 0.22);
-  --shadow-glass-ink-lift:
-    inset 0 1px 0 rgb(255 255 255 / 0.34), inset 0 -1px 0 rgb(0 0 0 / 0.3),
-    0 2px 6px rgb(22 25 42 / 0.18), 0 18px 40px rgb(22 25 42 / 0.28);
+  /* The primary control is champagne, not ink, so its lighting is warm all
+     the way through: a bright rim, a caramel foot, and a gold cast beneath
+     rather than the grey one a dark button would throw. */
+  --shadow-glass-gold:
+    inset 0 1px 0 rgb(255 255 255 / 0.55), inset 0 -1px 0 rgb(129 100 52 / 0.3),
+    0 1px 2px rgb(129 100 52 / 0.14), 0 10px 26px rgb(160 124 62 / 0.24);
+  --shadow-glass-gold-lift:
+    inset 0 1px 0 rgb(255 255 255 / 0.7), inset 0 -1px 0 rgb(129 100 52 / 0.32),
+    0 2px 6px rgb(129 100 52 / 0.16), 0 18px 40px rgb(160 124 62 / 0.32);
 
   /* --- Motion ----------------------------------------------------------- */
   --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
@@ -320,12 +325,12 @@
   }
 }
 
-/* Same lens, tuned for the near-black CTA where a 34% white top edge would
-   look like a smear rather than a rim. */
-@utility glass-ink {
-  --glass-top: 0.2;
-  --glass-foot: 0.04;
-  --glass-spec: 0.3;
+/* The champagne CTA. A white highlight does show on gold, but only barely,
+   so the specular is pushed brighter than the cream surfaces get. */
+@utility glass-gold {
+  --glass-top: 0.42;
+  --glass-foot: 0.12;
+  --glass-spec: 0.68;
 }
 
 /* On a near-white surface a white highlight is invisible, so the light that
@@ -435,7 +440,7 @@
 @media (prefers-reduced-motion: no-preference) {
   .step-in {
     opacity: 0;
-    animation: step-in-fwd 0.45s var(--ease-out-soft) forwards;
+    animation: step-in-fwd 0.38s var(--ease-out-soft) forwards;
     animation-delay: calc(var(--d, 0) * 70ms);
   }
 
@@ -498,16 +503,6 @@
   }
 }
 
-/* The auto-advance grace period, drawn across the continue button. */
-@keyframes iris-fill {
-  from {
-    width: 0%;
-  }
-  to {
-    width: 100%;
-  }
-}
-
 @keyframes iris-pop {
   0% {
     transform: scale(0.93);
@@ -550,7 +545,7 @@
 @keyframes step-in-fwd {
   from {
     opacity: 0;
-    transform: translate3d(-26px, 0, 0);
+    transform: translate3d(-16px, 0, 0);
   }
   to {
     opacity: 1;
@@ -561,7 +556,7 @@
 @keyframes step-in-back {
   from {
     opacity: 0;
-    transform: translate3d(26px, 0, 0);
+    transform: translate3d(16px, 0, 0);
   }
   to {
     opacity: 1;

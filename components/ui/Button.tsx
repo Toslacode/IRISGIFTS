@@ -14,9 +14,12 @@ type Size = 'sm' | 'md' | 'lg';
 
    The surfaces are glass: a translucent fill over a blurred, slightly
    over-saturated backdrop, a bright rim along the top edge and a specular
-   highlight that follows the pointer. On cream that reads as depth rather
-   than as a colour, which is why the palette is untouched — same ink, same
-   champagne gold, lit differently. */
+   highlight that follows the pointer.
+
+   The primary is champagne with navy type on it, not a near-black slab. On a
+   cream page a dark button is the heaviest thing on the screen and drags the
+   whole design toward an app; gold at 7.7:1 against the ink is every bit as
+   legible and belongs to the room it is in. */
 const base =
   'inline-flex items-center justify-center gap-2 rounded-pill ' +
   'font-medium cursor-pointer select-none text-center text-balance ' +
@@ -31,17 +34,17 @@ const base =
 
 const variants: Record<Variant, string> = {
   primary:
-    'glass glass-ink bg-ink/90 text-canvas shadow-glass-ink ' +
-    'hover:bg-ink/85 hover:shadow-glass-ink-lift ' +
+    'glass glass-gold border border-caramel/40 bg-gold text-ink shadow-glass-gold ' +
+    'hover:border-caramel/55 hover:bg-gold-lit hover:shadow-glass-gold-lift ' +
     /* Disabled is a waiting state, not a broken one: a quiet cream chip
-       rather than a faded near-black slab. */
-    'disabled:bg-canvas-deep disabled:text-ink-faint disabled:shadow-none ' +
-    'disabled:border disabled:border-line disabled:hover:bg-canvas-deep',
+       rather than a greyed-out gold one. */
+    'disabled:border-line disabled:bg-canvas-deep disabled:text-ink-faint ' +
+    'disabled:shadow-none disabled:hover:bg-canvas-deep disabled:hover:border-line',
   secondary:
-    'glass bg-surface/70 text-ink border border-line-strong/60 shadow-glass ' +
-    'hover:border-gold hover:bg-gold-wash/80 hover:shadow-glass-lift ' +
-    'disabled:opacity-50 disabled:shadow-none disabled:hover:border-line-strong/60 ' +
-    'disabled:hover:bg-surface/70',
+    'glass glass-warm bg-gold-wash/75 text-ink border border-gold-soft shadow-glass ' +
+    'hover:border-gold hover:bg-gold-wash hover:shadow-glass-lift ' +
+    'disabled:opacity-50 disabled:shadow-none disabled:hover:border-gold-soft ' +
+    'disabled:hover:bg-gold-wash/75',
   ghost:
     'bg-transparent text-ink-soft border border-transparent ' +
     'hover:text-ink hover:border-line/70 hover:bg-surface/60 ' +

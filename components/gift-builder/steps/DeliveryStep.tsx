@@ -38,7 +38,7 @@ export function DeliveryStep() {
         <div
           role="radiogroup"
           aria-label="איך תרצו לקבל את המתנה"
-          className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4"
+          className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-3"
         >
           {settings.pickupAvailable && (
             <ChoiceCard

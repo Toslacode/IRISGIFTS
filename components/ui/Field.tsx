@@ -171,7 +171,7 @@ export function TextAreaField({
             maxLength={maxLength}
             className={cn(
               controlBase,
-              'min-h-20 resize-y leading-relaxed sm:min-h-36',
+              'min-h-20 resize-y leading-relaxed sm:min-h-28',
               error ? 'border-danger' : 'border-line',
               className
             )}

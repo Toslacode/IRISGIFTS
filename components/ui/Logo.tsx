@@ -19,6 +19,8 @@ interface LogoProps {
   markOnly?: boolean;
   /** Drops the Hebrew tagline on tight surfaces. */
   compact?: boolean;
+  /** Over the opening film the wordmark has to go light to be readable. */
+  onFilm?: boolean;
   size?: 'sm' | 'md';
 }
 
@@ -27,6 +29,7 @@ export function Logo({
   href = '/',
   markOnly = false,
   compact = false,
+  onFilm = false,
   size = 'md',
 }: LogoProps) {
   const mark = size === 'sm' ? 'size-9' : 'size-11';
@@ -49,14 +52,20 @@ export function Logo({
           <span
             dir="ltr"
             className={cn(
-              'font-display font-medium tracking-[0.18em] text-ink',
+              'font-display font-medium tracking-[0.18em]',
+              onFilm ? 'text-media-text' : 'text-ink',
               size === 'sm' ? 'text-[0.9rem]' : 'text-[1.05rem]'
             )}
           >
             IRIS
           </span>
           {!compact && (
-            <span className="mt-0.5 text-[0.6875rem] font-medium tracking-[0.01em] text-ink-muted">
+            <span
+              className={cn(
+                'mt-0.5 text-[0.6875rem] font-medium tracking-[0.01em]',
+                onFilm ? 'text-media-muted' : 'text-ink-muted'
+              )}
+            >
               מתנות עם מחשבה
             </span>
           )}
