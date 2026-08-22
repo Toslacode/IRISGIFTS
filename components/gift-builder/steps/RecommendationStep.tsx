@@ -4,11 +4,11 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { useBuilder } from '@/components/gift-builder/BuilderContext';
 import { BasketItemRow } from '@/components/gift-builder/BasketItemRow';
+import { BasketPortrait } from '@/components/gift-builder/BasketPortrait';
 import { ProductPicker } from '@/components/gift-builder/ProductPicker';
 import { StepShell } from '@/components/gift-builder/StepShell';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
-import { ProductImage } from '@/components/ui/ProductImage';
 import { formatPrice } from '@/lib/order';
 import {
   draftTotal,
@@ -127,25 +127,7 @@ export function RecommendationStep() {
       <div className="flex flex-col gap-5 lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-start lg:gap-6">
         {/* --- The basket, as a thing you can look at --------------------- */}
         <div className="order-1 overflow-hidden rounded-panel border border-line bg-surface shadow-soft lg:order-none">
-          <div className="relative aspect-16/10 overflow-hidden">
-            <ProductImage
-              src={basket.image}
-              alt={basket.name}
-              category={lines[0]?.category ?? 'personalized'}
-              emphasis
-              className={cn(
-                'size-full transition-opacity duration-300',
-                reshuffling && 'opacity-40'
-              )}
-              sizes="(max-width: 1024px) 100vw, 55vw"
-            />
-
-            {basket.sourceBasketId && (
-              <span className="absolute end-4 top-4 rounded-pill bg-surface/90 px-3 py-1.5 text-[0.75rem] font-semibold text-gold-deep shadow-soft backdrop-blur-sm">
-                מארז מוכן של איריס
-              </span>
-            )}
-          </div>
+          <BasketPortrait basket={basket} lines={lines} muted={reshuffling} />
 
           <div className="flex flex-col gap-3 p-6">
             <h2 className="text-title text-[1.75rem]">{basket.name}</h2>

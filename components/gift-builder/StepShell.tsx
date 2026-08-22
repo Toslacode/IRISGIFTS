@@ -95,7 +95,7 @@ export function StepShell({
         className={cn(
           enter,
           !loose && !hideNav && 'flex flex-col justify-center',
-          !loose && !hideNav && 'min-h-[19rem] sm:min-h-[14rem]'
+          !loose && !hideNav && 'min-h-[19rem] sm:min-h-[19.5rem]'
         )}
         style={{ '--d': 1 } as React.CSSProperties}
       >
@@ -129,11 +129,21 @@ export function StepShell({
             </Button>
           </div>
 
-          {/* Gentle, never aggressive — a hint, not an error */}
-          {!canContinue && blockedHint && (
+          {/* Gentle, never aggressive — a hint, not an error.
+
+              It keeps its line whether or not it is showing: removing it the
+              moment a question is answered pulls Continue 35px up the screen
+              while the customer is still looking at it, which reads as the
+              page twitching under their thumb. */}
+          {blockedHint && (
             <p
-              className="text-center text-[0.875rem] text-ink-muted sm:text-end"
+              className={cn(
+                'min-h-5 text-center text-[0.875rem] text-ink-muted sm:text-end',
+                'transition-opacity duration-200',
+                canContinue && 'pointer-events-none opacity-0'
+              )}
               aria-live="polite"
+              aria-hidden={canContinue || undefined}
             >
               {blockedHint}
             </p>
