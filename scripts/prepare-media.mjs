@@ -67,6 +67,73 @@ const OPEN_CROP = '576:720:352:0';
 const OPEN_TALL_W = 1152;
 const OPEN_TALL_H = 1440;
 
+/* --- the burned-in mark ------------------------------------------------
+
+   The shop's mark is part of the footage, sitting in the top-right corner at
+   1280x720 — the same corner the site's own header badge occupies, so the two
+   read as one pile. And at that size it is being upscaled about 2.5x by the
+   time it reaches a retina screen, which is what makes it look soft. Nothing
+   can sharpen it; those pixels do not exist. So it is lifted out, the hole is
+   patched, and it is set back down smaller and lower, where it is upscaled
+   less and clears the header.
+
+   Two boxes, not one. MARK_WIPE covers every burned-in pixel of it — disc and
+   scattered stars alike — because anything left behind would read as a ghost
+   beside the moved mark. MARK_LIFT is deliberately tighter: it takes the disc
+   and the sparkles inside it, and lets the outer stars be patched away. The
+   block carries whatever sat behind the mark at its old position, so the less
+   of that background travels with it, the less there is to disagree with what
+   it lands on.
+
+   The patch works because the mark sits on the groom's dark jacket for most of
+   the film: delogo interpolates from the border of its box, and across a
+   low-detail dark field that reads as cloth rather than as a smear. Both boxes
+   are measured off the source at 4x — the disc spans x 955..1205, y 82..342,
+   loose stars reach x 912 and y 70, and the caption under it starts at y 360 —
+   and MARK_WIPE keeps real margin beyond that, because delogo samples a band
+   just inside its own border and a box that grazes the mark samples the mark.
+
+   The block is masked to a soft-edged ellipse rather than dropped in as a
+   rectangle — a straight edge against moving cloth crawls, a gradient across
+   twenty-odd pixels does not. */
+const MARK_WIPE = { x: 880, y: 52, w: 372, h: 302 };
+const MARK_LIFT = { x: 930, y: 64, w: 300, h: 296 };
+const MARK_SCALE = 0.8;
+const MARK_TO = { x: 960, y: 121 };
+const MARK_FEATHER = 0.13;
+
+/** delogo leaves a smooth linear fill where it had texture to replace. A
+    little blur across the same box turns that into something the eye reads as
+    defocus, which is what the rest of that corner already is. */
+const MARK_BLUR = 14;
+const MARK_BLUR_FEATHER = 0.3;
+
+/** The chain that does it, ending on the label given. */
+function markChain(out) {
+  const w = Math.round(MARK_LIFT.w * MARK_SCALE);
+  const h = Math.round(MARK_LIFT.h * MARK_SCALE);
+  const ellipse =
+    `255*clip((1-hypot((X/W-0.5)*2\\,(Y/H-0.5)*2))/${MARK_FEATHER}\\,0\\,1)`;
+  const rect =
+    `255*clip(min(min(X\\,W-1-X)/(W*${MARK_BLUR_FEATHER})\\,` +
+    `min(Y\\,H-1-Y)/(H*${MARK_BLUR_FEATHER}))\\,0\\,1)`;
+  const rgba = (a) =>
+    `format=rgba,geq=r='r(X\\,Y)':g='g(X\\,Y)':b='b(X\\,Y)':a='${a}'`;
+  return (
+    `[0:v]split=2[src][mark];` +
+    `[src]delogo=x=${MARK_WIPE.x}:y=${MARK_WIPE.y}:` +
+    `w=${MARK_WIPE.w}:h=${MARK_WIPE.h}[patched];` +
+    `[patched]split=2[p1][p2];` +
+    `[p2]crop=${MARK_WIPE.w}:${MARK_WIPE.h}:${MARK_WIPE.x}:${MARK_WIPE.y},` +
+    `gblur=sigma=${MARK_BLUR},${rgba(rect)}[soft];` +
+    `[p1][soft]overlay=x=${MARK_WIPE.x}:y=${MARK_WIPE.y}:format=auto[smooth];` +
+    `[mark]crop=${MARK_LIFT.w}:${MARK_LIFT.h}:${MARK_LIFT.x}:${MARK_LIFT.y},` +
+    `scale=${w}:${h}:flags=lanczos,${rgba(ellipse)}[small];` +
+    `[smooth][small]overlay=x=${MARK_TO.x}:y=${MARK_TO.y}:format=auto[${out}]`
+  );
+}
+
+
 /* --- the still-imagery clip's shape, in seconds ------------------------ */
 
 /** The calm head: the basket settled, roses only just beginning to lift.
@@ -149,6 +216,11 @@ if (existsSync(openingSrc)) {
     },
   ];
 
+  /* The mark is repositioned at source resolution, before anything is
+     scaled up, so the patch and the block are sharpened and graded along
+     with the rest of the frame instead of being pasted on afterwards. */
+  const graph = (rest) => `${markChain('m')};[m]${rest}[v]`;
+
   for (const cut of cuts) {
     console.log(`→ opening: ${cut.name}…`);
 
@@ -156,7 +228,8 @@ if (existsSync(openingSrc)) {
        render nothing from the mp4 alone. `-an` strips the audio a muted
        autoplay has no use for. */
     run([
-      '-i', openingSrc, '-an', '-vf', cut.filter, '-r', '24',
+      '-i', openingSrc, '-an',
+      '-filter_complex', graph(cut.filter), '-map', '[v]', '-r', '24',
       '-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', String(cut.vp9),
       '-row-mt', '1', '-cpu-used', '2', '-g', '240',
       join(VIDEO_OUT, `${cut.name}.webm`),
@@ -166,7 +239,8 @@ if (existsSync(openingSrc)) {
        systems actually play — which is why the phone cut's is not an
        afterthought. */
     run([
-      '-i', openingSrc, '-an', '-vf', cut.filter, '-r', '24',
+      '-i', openingSrc, '-an',
+      '-filter_complex', graph(cut.filter), '-map', '[v]', '-r', '24',
       '-c:v', 'libx264', '-crf', String(cut.h264), '-preset', 'slow',
       '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-movflags', '+faststart',
       join(VIDEO_OUT, `${cut.name}.mp4`),
@@ -174,10 +248,9 @@ if (existsSync(openingSrc)) {
 
     /* What the visitor sees before a single byte of video has arrived. */
     run([
-      '-ss', '0.4', '-i', openingSrc,
-      '-frames:v', '1',
-      '-vf', cut.filter.replace(`${ease},`, ''),
-      '-q:v', '4',
+      '-ss', '0.4', '-i', openingSrc, '-frames:v', '1', '-update', '1',
+      '-filter_complex', graph(cut.filter.replace(`${ease},`, '')),
+      '-map', '[v]', '-q:v', '4',
       join(VIDEO_OUT, `${cut.name}-poster.jpg`),
     ]);
   }
