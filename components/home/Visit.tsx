@@ -62,13 +62,6 @@ export function Visit() {
               </p>
             </div>
 
-            <a
-              href={`tel:${tel}`}
-              className="glass glass-gold flex min-h-14 w-fit items-center gap-3 rounded-pill border border-caramel/40 bg-gold px-7 text-lg font-medium text-ink shadow-glass-gold transition-[background-color,border-color,box-shadow,transform] duration-250 ease-out-soft hover:border-caramel/55 hover:bg-gold-lit hover:shadow-glass-gold-lift motion-safe:hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.985]"
-            >
-              <Icon name="phone" size={19} />
-              <span dir="ltr">{settings.storePhone}</span>
-            </a>
           </Reveal>
 
           <Reveal delay={1}>

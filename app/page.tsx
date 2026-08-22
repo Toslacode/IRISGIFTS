@@ -1,4 +1,5 @@
 import { About } from '@/components/home/About';
+import { BasketFilm } from '@/components/home/BasketFilm';
 import { HomeBuilder } from '@/components/home/HomeBuilder';
 import { Inspiration } from '@/components/home/Inspiration';
 import { Opening } from '@/components/home/Opening';
@@ -18,6 +19,7 @@ export default function HomePage() {
       <SectionRail />
       <main id="main">
         <Opening />
+        <BasketFilm />
         <Inspiration />
         <BuilderProvider embedded>
           <HomeBuilder />

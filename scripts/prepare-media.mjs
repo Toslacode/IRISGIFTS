@@ -27,7 +27,7 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -37,25 +37,34 @@ const VIDEO_OUT = join(root, 'public/video');
 const STILLS_OUT = join(root, 'public/images');
 const FRAMES_OUT = join(root, 'public/frames');
 
-/* --- the opening film, scrubbed on scroll ------------------------------ */
+/* --- the opening film ---------------------------------------------------
 
-/** The window that carries the arc: hands apart, the ring, hands together.
-    The first second and the last are the clip settling and are not part of
-    the movement, so scrubbing them reads as dead runway. */
-const OPEN_START = 1.1;
-const OPEN_LENGTH = 8.0;
+   Two cuts of the same clip, because a 16:9 frame and a phone held upright
+   want different pictures, not the same picture cropped harder. The wide cut
+   keeps the whole frame, the shop's mark included; the tall cut is a 4:5
+   window on the hands, which is the moment the film is about and the only
+   part that survives a portrait crop anyway.
 
-/** 10fps across 8 seconds is 80 frames. The scrub lerps between them, so a
-    higher rate buys nothing you can see and costs a megabyte a step. */
-const OPEN_FPS = 10;
+   It plays once. No loop, no scrub — the visitor watches it and moves on. */
 
-/** The source is 720p. Lanczos to 1080p with a light unsharp pass beats
-    handing the browser a 720p frame to stretch across a retina hero — and
-    on this footage it is nearly free, because the bokeh dominates the
-    bitrate and lowering WebP quality below 72 saves under 8%. */
+/** Skips the settle at the head and the drift at the tail. */
+const OPEN_START = 0.6;
+const OPEN_LENGTH = 9.2;
+
+/** The source is 720p, which is the ceiling. Lanczos to 1080p with a light
+    unsharp pass beats handing the browser a 720p file to stretch across a
+    retina screen — and at these bitrates the encode is no longer what limits
+    the picture: CRF 21 at 1080p already carries more than a 1.9 Mbps 720p
+    source contains. */
 const OPEN_W = 1920;
 const OPEN_H = 1080;
-const OPEN_QUALITY = 72;
+
+/** The phone window: 576x720 of the source, centred on where the hands meet,
+    scaled by the same 1.5x. Also puts the burned-in mark outside the frame,
+    which a portrait crop would have cut in half. */
+const OPEN_CROP = '576:720:352:0';
+const OPEN_TALL_W = 864;
+const OPEN_TALL_H = 1080;
 
 /* --- the still-imagery clip's shape, in seconds ------------------------ */
 
@@ -114,46 +123,65 @@ const openingSrc = join(SOURCE, 'opening-rings.mp4');
 mkdirSync(VIDEO_OUT, { recursive: true });
 mkdirSync(STILLS_OUT, { recursive: true });
 
-/* --- the opening: one frame sequence, scrubbed on scroll --------------- */
+/* --- the opening: two cuts, both playing once -------------------------- */
 
 if (existsSync(openingSrc)) {
-  console.log('→ opening: cutting the film into scroll frames…');
+  const sharpen = 'unsharp=5:5:0.42:5:5:0.0';
+  const grade = 'eq=saturation=0.95:contrast=1.03';
 
-  /* Rebuilt from scratch each run, so a shorter window never leaves the
-     tail of a longer one behind for the canvas to run past. */
+  const cuts = [
+    {
+      name: 'opening-wide',
+      filter: `scale=${OPEN_W}:${OPEN_H}:flags=lanczos,${sharpen},${grade}`,
+      vp9: 21,
+      h264: 19,
+    },
+    {
+      name: 'opening-tall',
+      filter:
+        `crop=${OPEN_CROP},scale=${OPEN_TALL_W}:${OPEN_TALL_H}:flags=lanczos,` +
+        `${sharpen},${grade}`,
+      vp9: 26,
+      h264: 20,
+    },
+  ];
+
+  for (const cut of cuts) {
+    console.log(`→ opening: ${cut.name}…`);
+
+    /* WebM first at playback time: some browsers ship no H.264 and would
+       render nothing from the mp4 alone. `-an` strips the audio a muted
+       autoplay has no use for. */
+    run([
+      '-ss', String(OPEN_START), '-t', String(OPEN_LENGTH), '-i', openingSrc,
+      '-an', '-vf', cut.filter,
+      '-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', String(cut.vp9),
+      '-row-mt', '1', '-cpu-used', '2', '-g', '240',
+      join(VIDEO_OUT, `${cut.name}.webm`),
+    ]);
+
+    run([
+      '-ss', String(OPEN_START), '-t', String(OPEN_LENGTH), '-i', openingSrc,
+      '-an', '-vf', cut.filter,
+      '-c:v', 'libx264', '-crf', String(cut.h264), '-preset', 'slow',
+      '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-movflags', '+faststart',
+      join(VIDEO_OUT, `${cut.name}.mp4`),
+    ]);
+
+    /* What the visitor sees before a single byte of video has arrived. */
+    run([
+      '-ss', String(OPEN_START + 0.2), '-i', openingSrc,
+      '-frames:v', '1', '-vf', cut.filter, '-q:v', '4',
+      join(VIDEO_OUT, `${cut.name}-poster.jpg`),
+    ]);
+  }
+
+  /* The scroll-scrubbed sequence this replaced. */
   rmSync(FRAMES_OUT, { recursive: true, force: true });
-  mkdirSync(FRAMES_OUT, { recursive: true });
 
-  run([
-    '-ss', String(OPEN_START), '-t', String(OPEN_LENGTH), '-i', openingSrc,
-    '-vf',
-    `fps=${OPEN_FPS},scale=${OPEN_W}:${OPEN_H}:flags=lanczos,` +
-      'unsharp=5:5:0.40:5:5:0.0,eq=saturation=0.95:contrast=1.03',
-    '-c:v', 'libwebp', '-quality', String(OPEN_QUALITY), '-start_number', '0',
-    join(FRAMES_OUT, 'frame-%03d.webp'),
-  ]);
-
-  const count = readdirSync(FRAMES_OUT).filter((f) => f.endsWith('.webp')).length;
-
-  /* The canvas reads this rather than carrying a hardcoded count that drifts
-     out of step with the files the moment the window changes. */
-  writeFileSync(
-    join(FRAMES_OUT, 'manifest.json'),
-    `${JSON.stringify({ count, width: OPEN_W, height: OPEN_H }, null, 2)}\n`
-  );
-
-  /* First paint, before a single frame has arrived. */
-  run([
-    '-ss', String(OPEN_START), '-i', openingSrc,
-    '-frames:v', '1',
-    '-vf', `scale=${OPEN_W}:-1:flags=lanczos,unsharp=5:5:0.40:5:5:0.0`,
-    '-q:v', '4',
-    join(FRAMES_OUT, 'poster.jpg'),
-  ]);
-
-  console.log(`✓ ${count} opening frames written to public/frames`);
+  console.log('✓ opening: wide and tall cuts written to public/video');
 } else {
-  console.log(`· no opening film at ${openingSrc} — leaving public/frames alone`);
+  console.log(`· no opening film at ${openingSrc} — leaving public/video alone`);
 }
 
 if (!existsSync(src)) {
