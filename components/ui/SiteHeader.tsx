@@ -109,7 +109,10 @@ export function SiteHeader({ transparent = false }: { transparent?: boolean }) {
               sets its own display, and this project's `cn` is a plain join —
               two display utilities on one element is a coin toss. */}
           <span className="hidden sm:block">
-            <ButtonLink href="/#builder" size="sm">
+            {/* Two words that must stay on one line: the base button balances
+                long labels across two rows, which on a 44px-tall bar turns
+                this into a squat oval. */}
+            <ButtonLink href="/#builder" size="sm" className="whitespace-nowrap">
               בניית מארז
             </ButtonLink>
           </span>

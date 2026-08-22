@@ -47,24 +47,25 @@ const FRAMES_OUT = join(root, 'public/frames');
 
    It plays once. No loop, no scrub — the visitor watches it and moves on. */
 
-/** Skips the settle at the head and the drift at the tail. */
-const OPEN_START = 0.6;
-const OPEN_LENGTH = 9.2;
+/** Eased out to about twelve seconds. The clip runs ten, and at its own pace
+    the film was over before anyone had settled into the page. */
+const OPEN_SLOW = 1.22;
 
-/** The source is 720p, which is the ceiling. Lanczos to 1080p with a light
-    unsharp pass beats handing the browser a 720p file to stretch across a
-    retina screen — and at these bitrates the encode is no longer what limits
-    the picture: CRF 21 at 1080p already carries more than a 1.9 Mbps 720p
-    source contains. */
-const OPEN_W = 1920;
-const OPEN_H = 1080;
+/** The source is 720p, which is the ceiling on detail — but not on the number
+    of pixels worth shipping. A 1440-wide window on a retina display asks for
+    2880 device pixels; hand the browser 1920 and it upscales by half again
+    with a bilinear filter, which is the softness that reads as "low quality".
+    Lanczos to 1440p with a real unsharp pass moves that work off the browser
+    and costs about half a megabyte over the 1080p encode. */
+const OPEN_W = 2560;
+const OPEN_H = 1440;
 
-/** The phone window: 576x720 of the source, centred on where the hands meet,
-    scaled by the same 1.5x. Also puts the burned-in mark outside the frame,
-    which a portrait crop would have cut in half. */
+/** The phone window: 576x720 of the source, centred on where the hands meet.
+    Also puts the burned-in mark outside the frame, which a portrait crop
+    would otherwise cut in half. */
 const OPEN_CROP = '576:720:352:0';
-const OPEN_TALL_W = 864;
-const OPEN_TALL_H = 1080;
+const OPEN_TALL_W = 1152;
+const OPEN_TALL_H = 1440;
 
 /* --- the still-imagery clip's shape, in seconds ------------------------ */
 
@@ -126,23 +127,25 @@ mkdirSync(STILLS_OUT, { recursive: true });
 /* --- the opening: two cuts, both playing once -------------------------- */
 
 if (existsSync(openingSrc)) {
-  const sharpen = 'unsharp=5:5:0.42:5:5:0.0';
+  const sharpen = 'unsharp=5:5:0.5:5:5:0.0';
   const grade = 'eq=saturation=0.95:contrast=1.03';
+
+  const ease = `setpts=${OPEN_SLOW}*PTS`;
 
   const cuts = [
     {
       name: 'opening-wide',
-      filter: `scale=${OPEN_W}:${OPEN_H}:flags=lanczos,${sharpen},${grade}`,
-      vp9: 21,
-      h264: 19,
+      filter: `${ease},scale=${OPEN_W}:${OPEN_H}:flags=lanczos,${sharpen},${grade}`,
+      vp9: 24,
+      h264: 22,
     },
     {
       name: 'opening-tall',
       filter:
-        `crop=${OPEN_CROP},scale=${OPEN_TALL_W}:${OPEN_TALL_H}:flags=lanczos,` +
-        `${sharpen},${grade}`,
-      vp9: 26,
-      h264: 20,
+        `${ease},crop=${OPEN_CROP},` +
+        `scale=${OPEN_TALL_W}:${OPEN_TALL_H}:flags=lanczos,${sharpen},${grade}`,
+      vp9: 27,
+      h264: 23,
     },
   ];
 
@@ -153,16 +156,17 @@ if (existsSync(openingSrc)) {
        render nothing from the mp4 alone. `-an` strips the audio a muted
        autoplay has no use for. */
     run([
-      '-ss', String(OPEN_START), '-t', String(OPEN_LENGTH), '-i', openingSrc,
-      '-an', '-vf', cut.filter,
+      '-i', openingSrc, '-an', '-vf', cut.filter, '-r', '24',
       '-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', String(cut.vp9),
       '-row-mt', '1', '-cpu-used', '2', '-g', '240',
       join(VIDEO_OUT, `${cut.name}.webm`),
     ]);
 
+    /* Safari shipped VP9-in-WebM late, so the mp4 is what iPhones on older
+       systems actually play — which is why the phone cut's is not an
+       afterthought. */
     run([
-      '-ss', String(OPEN_START), '-t', String(OPEN_LENGTH), '-i', openingSrc,
-      '-an', '-vf', cut.filter,
+      '-i', openingSrc, '-an', '-vf', cut.filter, '-r', '24',
       '-c:v', 'libx264', '-crf', String(cut.h264), '-preset', 'slow',
       '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-movflags', '+faststart',
       join(VIDEO_OUT, `${cut.name}.mp4`),
@@ -170,8 +174,10 @@ if (existsSync(openingSrc)) {
 
     /* What the visitor sees before a single byte of video has arrived. */
     run([
-      '-ss', String(OPEN_START + 0.2), '-i', openingSrc,
-      '-frames:v', '1', '-vf', cut.filter, '-q:v', '4',
+      '-ss', '0.4', '-i', openingSrc,
+      '-frames:v', '1',
+      '-vf', cut.filter.replace(`${ease},`, ''),
+      '-q:v', '4',
       join(VIDEO_OUT, `${cut.name}-poster.jpg`),
     ]);
   }
