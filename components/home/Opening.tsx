@@ -25,6 +25,23 @@ import { SplitWords } from '@/components/ui/Reveal';
    that dissolves the foot of it into the ivory ground rather than cutting.
    ========================================================================== */
 
+/* Where the frame is held when `cover` has to crop.
+
+   Horizontally this is the usual centre, and on a phone or a laptop — any
+   window narrower than 16:9 — that is the only axis that crops, so nothing
+   below changes what those visitors see.
+
+   Vertically it is not the centre, and that is the point. A wide, short window
+   — a maximised browser on a 16:10 monitor, say, at about 2.2:1 — crops the
+   film top and bottom instead, and a centred crop takes two hundred pixels off
+   the top. That drags the mark burned into the footage up behind the sticky
+   header, which is exactly the pile the shop asked to be rid of. Holding the
+   frame near its top keeps the mark where the film put it, and spends the crop
+   on the foot of the picture instead, which is dress and floor.
+
+   Ten per cent rather than zero so the very top of the frame still breathes. */
+const FRAMING = { objectPosition: '50% 10%' } as const;
+
 type Cut = 'wide' | 'tall';
 
 export function Opening() {
@@ -77,7 +94,7 @@ export function Opening() {
           <video
             ref={videoRef}
             key={cut}
-            className={`absolute inset-0 size-full object-cover object-center transition-opacity duration-700 ease-out-soft ${
+            className={`absolute inset-0 size-full object-cover transition-opacity duration-700 ease-out-soft ${
               ready ? 'opacity-100' : 'opacity-0'
             }`}
             autoPlay
@@ -86,7 +103,7 @@ export function Opening() {
             playsInline
             preload="auto"
             poster={`/video/opening-${cut}-poster.jpg`}
-            style={{ filter: 'saturate(0.94) contrast(1.03)' }}
+            style={{ ...FRAMING, filter: 'saturate(0.94) contrast(1.03)' }}
           >
             <source src={`/video/opening-${cut}.webm`} type="video/webm" />
             <source src={`/video/opening-${cut}.mp4`} type="video/mp4" />
@@ -101,7 +118,8 @@ export function Opening() {
             src={`/video/opening-${cut}-poster.jpg`}
             alt=""
             aria-hidden="true"
-            className="absolute inset-0 -z-10 size-full object-cover object-center"
+            className="absolute inset-0 -z-10 size-full object-cover"
+            style={FRAMING}
           />
         )}
 
