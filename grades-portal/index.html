@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Physiology Grades</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--text:#1d2330;--muted:#6b7280;--line:#e3e6eb;--accent:#2563eb;--danger:#dc2626;--ok:#16a34a}
+@media (prefers-color-scheme:dark){:root{--bg:#111418;--card:#1a1f26;--text:#e7eaee;--muted:#9aa3ae;--line:#2b323c;--accent:#60a5fa;--danger:#f87171;--ok:#4ade80}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,sans-serif}
+main{max-width:860px;margin:0 auto;padding:24px 16px}h1{font-size:22px;margin:0 0 4px}h2{font-size:17px;margin:0 0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0}
+input,textarea,select{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+textarea{min-height:110px}label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+button{font:inherit;border:0;border-radius:8px;padding:9px 14px;background:var(--accent);color:#fff;cursor:pointer;margin-top:10px}
+button.ghost{background:transparent;color:var(--accent);border:1px solid var(--line)}button.del{background:transparent;color:var(--danger);padding:2px 8px;margin:0}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:500}
+td input{padding:4px 6px;width:70px}.muted{color:var(--muted);font-size:13px}.err{color:var(--danger)}.okc{color:var(--ok)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}.tabs button{margin:0}.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1;min-width:160px}
+.hidden{display:none}.grade{font-size:22px;font-weight:600}.scroll{overflow-x:auto}code{font-size:14px;letter-spacing:1px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Physiology — Grades</h1>
+  <div class="tabs"><button id="tStudent">Student</button><button id="tLect" class="ghost">Lecturer</button></div>
+
+  <!-- STUDENT -->
+  <section id="student">
+    <div class="card" id="sLogin">
+      <h2>Check your grades</h2>
+      <label>Neptun code</label><input id="sNeptun" autocomplete="username">
+      <label>Password (from your lecturer)</label><input id="sPin" type="password" autocomplete="current-password">
+      <button id="sGo">Show grades</button> <p id="sErr" class="err"></p>
+    </div>
+    <div class="card hidden" id="sView"></div>
+  </section>
+
+  <!-- LECTURER -->
+  <section id="lect" class="hidden">
+    <div class="card" id="lLogin">
+      <h2>Lecturer login</h2>
+      <label>Password</label><input id="lPw" type="password">
+      <p class="muted">The first password ever entered becomes the lecturer password.</p>
+      <button id="lGo">Log in</button> <p id="lErr" class="err"></p>
+    </div>
+    <div id="lPanel" class="hidden">
+      <div class="card">
+        <h2>1. Students (enter once)</h2>
+        <p class="muted">Paste from Excel: one student per line — <b>Name</b> and <b>Neptun code</b> (tab or comma separated, any order). Each new student gets a password automatically.</p>
+        <textarea id="stPaste" placeholder="Kiss Anna	ABC123&#10;John Smith, XYZ789"></textarea>
+        <button id="stAdd">Add / update students</button> <span id="stMsg" class="muted"></span>
+        <div class="scroll"><table id="stTable"></table></div>
+        <button class="ghost" id="stCsv">Download student passwords (CSV)</button>
+      </div>
+
+      <div class="card">
+        <h2>2. New grades</h2>
+        <div class="row">
+          <div><label>Exam / test name</label><input id="exTitle" placeholder="Midterm 1"></div>
+          <div><label>Date</label><input id="exDate" type="date"></div>
+        </div>
+        <label>Fill grades from a photo of the grade sheet (optional)</label>
+        <input id="photo" type="file" accept="image/*" capture="environment">
+        <p class="muted" id="ocrMsg">Works best with a printed/typed list: name or Neptun code and the grade on the same line. Always check the result below before saving.</p>
+        <div class="scroll"><table id="grTable"></table></div>
+        <button id="exSave">Save and publish</button> <span id="exMsg"></span>
+      </div>
+
+      <div class="card">
+        <h2>3. Published grades</h2>
+        <div class="scroll"><table id="exTable"></table></div>
+      </div>
+
+      <div class="card">
+        <h2>Settings</h2>
+        <label>New lecturer password</label><input id="newPw" type="password">
+        <button class="ghost" id="pwSave">Change password</button> <span id="pwMsg" class="muted"></span>
+        <br><button class="ghost" id="logout">Log out</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+// ====== CONFIG: paste your Supabase project values here ======
+const SUPABASE_URL = "https://YOUR-PROJECT.supabase.co";
+const SUPABASE_KEY = "YOUR-ANON-OR-PUBLISHABLE-KEY";
+// =============================================================
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+async function rpc(fn, args) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {method:"POST",
+    headers:{"Content-Type":"application/json", apikey:SUPABASE_KEY, Authorization:`Bearer ${SUPABASE_KEY}`},
+    body: JSON.stringify(args)});
+  const t = await r.text(); const j = t ? JSON.parse(t) : null;
+  if (!r.ok) throw new Error(j?.message || "Server error");
+  return j;
+}
+
+// tabs
+function tab(isLect){ $("student").classList.toggle("hidden",isLect); $("lect").classList.toggle("hidden",!isLect);
+  $("tStudent").className = isLect?"ghost":""; $("tLect").className = isLect?"":"ghost"; }
+$("tStudent").onclick = () => tab(false); $("tLect").onclick = () => tab(true);
+
+// ---------- student ----------
+$("sGo").onclick = async () => {
+  $("sErr").textContent = "";
+  try {
+    const d = await rpc("gp_student_grades", {code:$("sNeptun").value, p:$("sPin").value});
+    $("sView").innerHTML = `<h2>${esc(d.name)}</h2>` + (d.grades.length
+      ? `<table><tr><th>Date</th><th>Exam</th><th>Grade</th></tr>${d.grades.map(g =>
+          `<tr><td>${esc(g.date)}</td><td>${esc(g.title)}</td><td class="grade">${esc(g.grade)}</td></tr>`).join("")}</table>`
+      : `<p class="muted">No grades published yet.</p>`) + `<button class="ghost" onclick="location.reload()">Log out</button>`;
+    $("sLogin").classList.add("hidden"); $("sView").classList.remove("hidden");
+  } catch(e){ $("sErr").textContent = e.message; }
+};
+$("sPin").onkeydown = e => e.key==="Enter" && $("sGo").click();
+
+// ---------- lecturer ----------
+let PW = "", DATA = {students:[],exams:[],grades:[]};
+async function load(){ DATA = await rpc("gp_admin_data", {pw:PW}); render(); }
+$("lGo").onclick = async () => {
+  $("lErr").textContent = "";
+  try { PW = $("lPw").value; if(!await rpc("gp_admin_ok",{pw:PW})) throw new Error("Wrong password");
+    sessionStorageSet(PW); await load(); $("lLogin").classList.add("hidden"); $("lPanel").classList.remove("hidden");
+  } catch(e){ $("lErr").textContent = e.message; }
+};
+$("lPw").onkeydown = e => e.key==="Enter" && $("lGo").click();
+function sessionStorageSet(v){ try{ sessionStorage.setItem("gp_pw", v); }catch{} }
+$("logout").onclick = () => { sessionStorageSet(""); location.reload(); };
+(async () => { try { const v = sessionStorage.getItem("gp_pw"); if (v){ $("lPw").value=v; tab(true); $("lGo").click(); } } catch{} })();
+$("exDate").valueAsDate = new Date();
+
+function render(){
+  const S = DATA.students;
+  $("stTable").innerHTML = S.length ? `<tr><th>Name</th><th>Neptun</th><th>Student password</th><th></th></tr>` +
+    S.map(s => `<tr><td>${esc(s.name)}</td><td>${esc(s.neptun)}</td><td><code>${esc(s.pin)}</code></td>
+      <td><button class="del" data-n="${esc(s.neptun)}">✕</button></td></tr>`).join("") : `<tr><td class="muted">No students yet.</td></tr>`;
+  $("stTable").querySelectorAll(".del").forEach(b => b.onclick = async () => {
+    if (!confirm("Delete this student and their grades?")) return;
+    await rpc("gp_delete_student",{pw:PW, code:b.dataset.n}); load(); });
+  $("grTable").innerHTML = S.length ? `<tr><th>Name</th><th>Neptun</th><th>Grade</th></tr>` +
+    S.map(s => `<tr><td>${esc(s.name)}</td><td>${esc(s.neptun)}</td><td><input data-n="${esc(s.neptun)}"></td></tr>`).join("") : "";
+  const count = id => DATA.grades.filter(g => g.exam_id===id).length;
+  $("exTable").innerHTML = DATA.exams.length ? `<tr><th>Date</th><th>Exam</th><th>Grades</th><th></th></tr>` +
+    DATA.exams.map(e => `<tr><td>${esc(e.exam_date)}</td><td>${esc(e.title)}</td><td>${count(e.id)}</td>
+      <td><button class="del" data-e="${e.id}">✕</button></td></tr>`).join("") : `<tr><td class="muted">Nothing published yet.</td></tr>`;
+  $("exTable").querySelectorAll(".del").forEach(b => b.onclick = async () => {
+    if (!confirm("Delete this exam and all its grades?")) return;
+    await rpc("gp_delete_exam",{pw:PW, eid:+b.dataset.e}); load(); });
+}
+
+$("stAdd").onclick = async () => {
+  const rows = $("stPaste").value.split(/\r?\n/).map(l => l.split(/\t|,|;/).map(x => x.trim()).filter(Boolean)).filter(p => p.length >= 2)
+    .map(p => { const i = p.findIndex(x => /^[A-Za-z0-9]{6}$/.test(x) && /\d/.test(x)); const k = i<0 ? p.length-1 : i;
+      return {neptun:p[k], name:p.filter((_,j)=>j!==k).join(" ")}; });
+  if (!rows.length) return $("stMsg").textContent = "Nothing recognised.";
+  try { await rpc("gp_upsert_students",{pw:PW, rows}); $("stPaste").value=""; $("stMsg").textContent = `${rows.length} saved.`; load(); }
+  catch(e){ $("stMsg").textContent = e.message; }
+};
+$("stCsv").onclick = () => {
+  const csv = "Name,Neptun,Password\n" + DATA.students.map(s => `"${s.name}",${s.neptun},${s.pin}`).join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿"+csv],{type:"text/csv"}));
+  a.download = "student-passwords.csv"; a.click();
+};
+
+$("exSave").onclick = async () => {
+  const grades = [...$("grTable").querySelectorAll("input")].map(i => ({neptun:i.dataset.n, grade:i.value.trim()})).filter(g => g.grade);
+  if (!$("exTitle").value.trim()) return $("exMsg").textContent = "Enter an exam name.";
+  if (!grades.length) return $("exMsg").textContent = "No grades entered.";
+  try { await rpc("gp_save_exam",{pw:PW, title:$("exTitle").value.trim(), d:$("exDate").value, grades});
+    $("exMsg").innerHTML = `<span class="okc">Published ${grades.length} grades.</span>`; $("exTitle").value=""; load(); }
+  catch(e){ $("exMsg").textContent = e.message; }
+};
+
+// ---------- photo → grades (OCR in the browser) ----------
+const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim();
+function lev(a,b){ const d=Array.from({length:a.length+1},(_,i)=>[i]); for(let j=1;j<=b.length;j++)d[0][j]=j;
+  for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+  return d[a.length][b.length]; }
+function matchLine(line){
+  const n = norm(line), up = line.toUpperCase();
+  let s = DATA.students.find(s => up.includes(s.neptun));
+  if (!s) { let best=null, bd=1e9;
+    for (const st of DATA.students){ const nm = norm(st.name); const toks = nm.split(" ");
+      const sc = toks.reduce((t,tok)=> t + Math.min(...n.split(" ").map(w=>lev(w,tok)/Math.max(tok.length,1))), 0)/toks.length;
+      if (sc < bd){ bd=sc; best=st; } }
+    if (bd < 0.34) s = best; }
+  if (!s) return null;
+  const rest = up.replace(s.neptun,"");
+  const nums = rest.match(/\d+(?:[.,]\d+)?/g); if (!nums) return null;
+  return {neptun:s.neptun, grade:nums[nums.length-1].replace(",",".")};
+}
+$("photo").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  if (!DATA.students.length) return $("ocrMsg").textContent = "Add students first.";
+  $("ocrMsg").textContent = "Reading the photo… (can take ~20 seconds)";
+  try {
+    const {data:{text}} = await Tesseract.recognize(f, "eng+hun");
+    let hit = 0;
+    for (const line of text.split("\n")) { const m = matchLine(line); if (!m) continue;
+      const inp = $("grTable").querySelector(`input[data-n="${m.neptun}"]`); if (inp){ inp.value = m.grade; inp.style.borderColor="var(--ok)"; hit++; } }
+    $("ocrMsg").textContent = `Filled ${hit} of ${DATA.students.length} students from the photo (green). Please check and fix before saving.`;
+  } catch(err){ $("ocrMsg").textContent = "Could not read the photo: " + err.message; }
+  e.target.value = "";
+};
+
+$("pwSave").onclick = async () => {
+  try { await rpc("gp_change_password",{pw:PW, new_pw:$("newPw").value}); PW=$("newPw").value; sessionStorageSet(PW);
+    $("pwMsg").textContent="Changed."; $("newPw").value=""; } catch(e){ $("pwMsg").textContent = e.message; }
+};
+</script>
+</body>
+</html>
